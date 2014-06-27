@@ -1,0 +1,189 @@
+package com.example.mingle;
+//package com.hmkcode.android;
+
+        import android.app.Activity;
+        import android.content.Context;
+        import android.content.Intent;
+        import android.graphics.Bitmap;
+        import android.os.AsyncTask;
+        import java.net.*;
+        import java.io.BufferedReader;
+        import io.socket.*;
+
+
+        import java.io.InputStreamReader;
+        import java.net.HttpURLConnection;
+        import java.net.URL;
+        import java.security.NoSuchAlgorithmException;
+        import java.util.ArrayList;
+
+        import com.example.mingle.MingleUser;
+        //import com.hmkcode.android.vo.Person;
+        import org.json.*;
+        import java.lang.String;
+
+        import javax.net.ssl.SSLContext;
+
+        import android.util.Log;
+
+/**
+ * Created by Tempnote on 2014-06-02.
+ */
+public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
+
+    private SocketIO socket = null;
+    private Context currContext = null;
+
+    public HttpHelper(String url, Context context){
+        try {
+           //SocketIO.setDefaultSSLSocketFactory(SSLContext.getDefault());
+            socket = new SocketIO(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } /*catch (NoSuchAlgorithmException f) {
+            f.printStackTrace();
+        }*/
+
+        System.out.println("kill me now");
+        if (socket == null) {
+            System.out.println("Socket is not availiable");
+            return;
+        }
+        //String cook  = CookieManager.;
+        System.out.println(socket.toString());
+        socket.addHeader("Cookie", "cookie");
+        currContext = context;
+
+        IOCallback sth  = new IOCallback() {
+
+            @Override
+            public void onMessage(String data, IOAcknowledge ack) {
+                System.out.println("Server said: " + data);
+            }
+
+            @Override
+            public void onError(SocketIOException socketIOException) {
+                System.out.println("an Error occured");
+
+                socketIOException.printStackTrace();
+            }
+
+            @Override
+            public void onDisconnect() {
+                System.out.println("Connection terminated.");
+            }
+
+            @Override
+            public void onConnect() {
+                System.out.println("Connection established");
+            }
+
+            @Override
+            public void on(String event, IOAcknowledge ack, Object... args) {
+                System.out.println("Server triggered event '" + event + "'");
+
+                if(event.equals("user_create_return")){
+                    ((MainActivity)currContext).createUser((JSONObject) args[0]);
+
+                    Intent i = new Intent(currContext, HuntActivity.class);
+                    currContext.startActivity(i);
+                }
+
+                if(event.equals("get_list_return")){
+                    ((HuntActivity)currContext).showList((JSONArray)args[0]);
+                }
+            }
+
+            @Override
+            public void onMessage(JSONObject json, IOAcknowledge ack) {
+                try {
+
+                    //Intent intent = new Intent("data_op");
+                    //intent.putExtra("extra", extra);
+                    //startActivity(intent);
+                    //Activity curActivity = ((MingleApplication)this.getApplicationContext()).getCurrentActivity();
+                    //curActivity.sendBroadcast(intent);
+                    System.out.println("Server said:" + json.toString(2));
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        socket.connect( sth);
+    }
+
+    //what's this? -SK
+    public void send(String message) {
+        assert socket !=null;
+        socket.send(message);
+    }
+
+    /* Method Name: changeContext
+     * Should be called whenever the context changes.
+     */
+    public void changeContext (Context context){
+        this.currContext = context;
+    }
+
+    /*
+    * Sends login info along to the server, and hopefully what will be returned
+    * is the unique id of the user as well as some other useful information
+    */
+    public void sendInitialInfo(ArrayList<Bitmap> photos, String comment, String sex, int number, float longitude, float latitude) {
+
+        if (photos == null) photos = new ArrayList<Bitmap>();
+        JSONObject initInfoObject = new JSONObject();
+        JSONObject photo_arr = new JSONObject();
+        try {
+            initInfoObject.put("comm",comment);
+            initInfoObject.put("sex",sex);
+            initInfoObject.put("num",number);
+            initInfoObject.put("loc_long",longitude);
+            initInfoObject.put("loc_lat",latitude);
+
+            //initInfoObject.put("photo_count", photos.size());
+            for (int i = 0; i < 3; i++) {
+                Integer x = i;
+                if( i < photos.size())
+                    initInfoObject.put("pic" + Integer.toString(x + 1), photos.get(i));
+                else
+                    initInfoObject.put("pic" + Integer.toString(x + 1),"");
+            }
+            //initInfoObject.put("photos", photo_arr);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        socket.emit("user_create",initInfoObject);
+    }
+
+    public void requestUserList(String uid, String sex, float loc_lat, float loc_long, int dist_lim) {
+        JSONObject userListRequestObject = new JSONObject();
+        try {
+            userListRequestObject.put("uid", uid);
+            userListRequestObject.put("sex", sex);
+            userListRequestObject.put("loc_lat", loc_lat);
+            userListRequestObject.put("loc_long", loc_long);
+            userListRequestObject.put("dist_lim", dist_lim);
+            userListRequestObject.put("list_num", 10);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        socket.emit("get_list", userListRequestObject);
+    }
+
+    //@Override
+    protected Integer doInBackground(String... urls) {
+        return 0;
+    }
+
+    //@Override
+    protected void onProgressUpdate(Integer... progress) {
+       // setProgressPercent(progress[0]);
+    }
+
+    //Override
+    protected void onPostExecute(Long result) {
+        //showDialog("Downloaded " + result + " bytes");
+    }
+}

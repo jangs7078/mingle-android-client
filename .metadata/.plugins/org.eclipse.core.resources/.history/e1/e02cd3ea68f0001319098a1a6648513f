@@ -1,0 +1,55 @@
+package socketTest;
+
+import io.socket.IOAcknowledge;
+
+import io.socket.IOCallback;
+import io.socket.SocketIO;
+import io.socket.SocketIOException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.*;
+import java.net.*;
+public class SocketTestMain implements IOCallback {
+	 public static void main(String[] args) {
+	BufferedReader in = new BufferedReader(new InputStreamReader(
+	         System.in));
+	      PrintStream out = System.out;   	
+	      try {
+	         //Socket c = new Socket("ec2-54-199-191-226.ap-northeast-1.compute.amazonaws.com",8000);
+	         Socket c = new Socket("127.0.0.1", 8000);
+	         printSocketInfo(c);
+	         BufferedWriter w = new BufferedWriter(new OutputStreamWriter(
+	            c.getOutputStream()));
+	         BufferedReader r = new BufferedReader(new InputStreamReader(
+	            c.getInputStream()));
+	         String m = null;
+	         System.out.println("about to start reading");
+	         while ((m=r.readLine())!= null) {
+	        	 System.out.println("reading!!!");
+	            out.println(m);
+	            m = in.readLine();
+	            w.write(m,0,m.length());
+	            w.newLine();
+	            w.flush();
+	         }
+	         w.close();
+	         r.close();
+	         c.close();
+	      } catch (IOException e) {
+	         System.err.println(e.toString());
+	      }
+	 }
+	 private static void printSocketInfo(Socket s) {
+	      System.out.println("Remote address = "
+	         +s.getInetAddress().toString());
+	      System.out.println("Remote port = "
+	         +s.getPort());
+	      System.out.println("Local socket address = "
+	         +s.getLocalSocketAddress().toString());
+	      System.out.println("Local address = "
+	         +s.getLocalAddress().toString());
+	      System.out.println("Local port = "
+	         +s.getLocalPort());
+	   }
+}
