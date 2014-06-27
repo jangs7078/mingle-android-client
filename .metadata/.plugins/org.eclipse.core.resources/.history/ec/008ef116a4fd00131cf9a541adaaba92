@@ -33,7 +33,7 @@ public class AllChatFragment extends Fragment {
 
   public SwipeListView allchatlistview;
 	private ItemAdapter adapter;
-	private List<ItemRow> itemData;
+	public List<ItemRow> itemData;
   private Activity parent;
   
   
@@ -58,7 +58,7 @@ public class AllChatFragment extends Fragment {
 	  
       
       // Loads new matches
-      new LoadDataTask(parent.getApplication(), 10).execute();
+      new parent.LoadDataTask(parent.getApplication(), 10).execute();
       
       final Activity curActivity = parent;
       
@@ -135,82 +135,6 @@ public class AllChatFragment extends Fragment {
     return rootView;
   }
   
-  protected class LoadDataTask extends AsyncTask<Void, Void, Void> {
-  	
-  	private Application curApp;
-  	
-  	private int load_num;
-  	
-  	public LoadDataTask(Application app, int load_num) {
-  		curApp = app;
-  		this.load_num = load_num;
-  	}
-  	
-		@Override
-		protected Void doInBackground(Void... params) {
 
-			if (isCancelled()) {
-				return null;
-			}
-
-	        
-			MingleUser currUser = ((MingleApplication) curApp).currUser;
-      	((MingleApplication) curApp).initHelper.requestUserList(currUser.getUid(), currUser.getSex(), 
-					currUser.getLat(), currUser.getLong(), currUser.getDist(), load_num);
-
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-
-			// We need notify the adapter that the data have been changed
-			adapter.notifyDataSetChanged();
-
-			// Call onLoadMoreComplete when the LoadMore task, has finished
-			allchatlistview.onLoadMoreComplete();
-
-			super.onPostExecute(result);
-		}
-
-		@Override
-		protected void onCancelled() {
-			// Notify the loading more operation has finished
-			allchatlistview.onLoadMoreComplete();
-		}
-	}
-  
-  private class ApplicationWrapper {
-		Application curApp;
-		public ApplicationWrapper(Application app) {
-			curApp = app;
-		}
-	}
-	
-  public int convertDpToPixel(float dp) {
-      DisplayMetrics metrics = getResources().getDisplayMetrics();
-      float px = dp * (metrics.densityDpi / 160f);
-      return (int) px;
-  }
-  
-  /* Method name: showList
-   * Retrieve data from HttpHelper. Content of data is the list of nearby users of opposite sex.
-   * This method also appends the new data to the list and shows them on the screen.
-   */
-  public void updateList(JSONArray listData){
-  	System.out.println("showlist!");
-  	System.out.println(listData.toString());
-      for(int i = 0 ; i < listData.length(); i++) {
-          try {
-              JSONObject shownUser = listData.getJSONObject(i);
-              ((MingleApplication) parent.getApplication()).currUser.addUser(shownUser);
-             
-              
-              itemData.add(new ItemRow(shownUser.getString("COMM") + " " + shownUser.getString("NUM"), (Drawable) getResources().getDrawable(R.drawable.ic_launcher) ));
-          } catch (JSONException e){
-              e.printStackTrace();
-          }
-      }        
-  }
   
 }

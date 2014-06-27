@@ -153,9 +153,8 @@ public class AllChatFragment extends Fragment {
 				return null;
 			}
 
-	        
 			MingleUser currUser = ((MingleApplication) curApp).currUser;
-      	((MingleApplication) curApp).initHelper.requestUserList(currUser.getUid(), currUser.getSex(), 
+			((MingleApplication) curApp).initHelper.requestUserList(currUser.getUid(), currUser.getSex(), 
 					currUser.getLat(), currUser.getLong(), currUser.getDist(), load_num);
 
 			return null;

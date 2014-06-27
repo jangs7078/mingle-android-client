@@ -128,8 +128,6 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
 		  }
 	    
 	  }
-	  
-	  
 	
 }
 
