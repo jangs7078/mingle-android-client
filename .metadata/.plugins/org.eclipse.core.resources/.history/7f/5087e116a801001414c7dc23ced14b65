@@ -36,6 +36,22 @@ public class AllChatFragment extends Fragment {
   private AllChatAdapter adapter;
   
   private Activity parent;	//Parent Activity: HuntActivity
+  /*
+  private void populateList() {
+	  if(userData.size() == 0) {
+		  ArrayList<JSONObject> users = ((MingleApplication) parent.getApplication()).currUser.getUsers();
+		  for(int i = 0 ; i < users.size(); i++) {
+	          try {
+	              JSONObject shownUser = users.get(i);
+	              userData.add(new ItemRow(shownUser.getString("COMM") + " " + shownUser.getString("NUM"), (Drawable) getResources().getDrawable(R.drawable.ic_launcher) ));
+	          } catch (JSONException e){
+	              e.printStackTrace();
+	          }
+	      }     
+	  }
+	  
+  }*/
+  
   
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,6 +63,7 @@ public class AllChatFragment extends Fragment {
 	  
 	  allchatlistview=  (SwipeListView)(rootView.findViewById(R.id.All));
       user_list = ((MingleApplication) parent.getApplication()).currUser.getChattableUsers();
+      //populateList();
       adapter=new AllChatAdapter(parent, R.layout.allchat_row,user_list);
 	  
       
@@ -122,14 +139,17 @@ public class AllChatFragment extends Fragment {
           }
       });
       
+      //Load first 10 chattable users
+	  new LoadDataTask(parent.getApplication(), 10).execute();
+      
       System.out.println("AllchatFrag oncreate compleate");
     return rootView;
   }
   
-  public void loadNewMatches(Activity par) {
+  /*public void loadNewMatches(Activity par) {
 	  parent = par;
 	  new LoadDataTask(parent.getApplication(), 10).execute();
-  }
+  }*/
   
   private class LoadDataTask extends AsyncTask<Void, Void, Void> {
   	

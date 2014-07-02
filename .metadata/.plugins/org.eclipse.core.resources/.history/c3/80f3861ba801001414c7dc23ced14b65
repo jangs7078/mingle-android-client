@@ -31,7 +31,7 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
         // Change the current activity to HuntActivity in HttpHelper
         ((MingleApplication) this.getApplication()).connectHelper.changeContext(this);
 
-        //Load first 10 chattable users
+        // Generate first list of users
         allChatFragment.loadNewMatches(this);
         
         ((MingleApplication) this.getApplication()).connectHelper.connectSocket();

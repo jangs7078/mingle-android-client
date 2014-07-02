@@ -31,8 +31,8 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
         // Change the current activity to HuntActivity in HttpHelper
         ((MingleApplication) this.getApplication()).connectHelper.changeContext(this);
 
-        //Load first 10 chattable users
-        allChatFragment.loadNewMatches(this);
+        // Generate first list of users
+        //allChatFragment.loadNewMatches(this);
         
         ((MingleApplication) this.getApplication()).connectHelper.connectSocket();
     }
@@ -101,12 +101,26 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
 		  }	    
 	  }
 	  
-	  @Override
 	  public void onRestart(){
 	        super.onRestart();
 	        // Change the current activity to HuntActivity in HttpHelper
-	        System.out.println(this);
-	        ((MingleApplication) this.getApplication()).connectHelper.changeContext(this);
+	        System.out.println("restart");
+	 }
+	  
+	  public void onStart(){
+	        super.onStart();
+	        // Change the current activity to HuntActivity in HttpHelper
+	        System.out.println("start");
+	 }
+	  public void onResume(){
+	        super.onResume();
+	        // Change the current activity to HuntActivity in HttpHelper
+	        System.out.println("resume");
+	 }
+	  public void onPause(){
+	        super.onPause();
+	        // Change the current activity to HuntActivity in HttpHelper
+	        System.out.println("pause");
 	 }
 }
 

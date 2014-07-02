@@ -37,7 +37,7 @@ public class ChatroomActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         
         
-     // Change the current activity to ChatroomActivity in HttpHelper
+     // Change the current activity to HuntActivity in HttpHelper
         ((MingleApplication) this.getApplication()).connectHelper.changeContext(this);
         
         
@@ -115,4 +115,8 @@ public class ChatroomActivity extends ListActivity {
 		}
     }
     
+    @Override
+    public void onBackPressed() {
+        // your code.
+    }
 }
