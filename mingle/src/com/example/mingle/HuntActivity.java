@@ -1,43 +1,21 @@
 package com.example.mingle;
 
 import android.app.ActionBar.Tab;
-import android.app.Activity;
-import android.app.Application;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.View;
-import android.widget.Toast;
-
-import com.fortysevendeg.swipelistview.BaseSwipeListViewListener;
-import com.fortysevendeg.swipelistview.SwipeListView;
-import com.fortysevendeg.swipelistview.SwipeListView.OnLoadMoreListener;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.lang.String;
-import java.util.ArrayList;
-import java.util.List;
-
-import android.support.v4.app.FragmentActivity;
 import android.app.ActionBar;
 public class HuntActivity extends FragmentActivity implements ActionBar.TabListener	 {
-
 	
-	 public Fragment allChatFragment;
-	 public Fragment ongoingChatFragment;
+	 public AllChatFragment allChatFragment;			//Fragment for list of chattable users
+	 public OngoingChatFragment ongoingChatFragment;	//Fragment for list of users whom current user is chatting with
 		
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hunt);
-        
+        System.out.println("hunt on create");
         // Set up the action bar to show tabs.
         final ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -49,22 +27,20 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
             .setTabListener(this).setTag(R.string.tab2title));
         
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        
+        System.out.println("hunt navigation set");
         // Change the current activity to HuntActivity in HttpHelper
-        ((MingleApplication) this.getApplication()).initHelper.changeContext(this);
+        ((MingleApplication) this.getApplication()).connectHelper.changeContext(this);
 
-        Context context = getApplicationContext();
-        CharSequence text = "User created successfully!";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+        // Generate first list of users
+        //allChatFragment.loadNewMatches(this);
         
-        
+        ((MingleApplication) this.getApplication()).connectHelper.connectSocket();
     }
-    
 	
-	  
+	//?????
+    public String getMyUid(){
+    	return ((MingleApplication) this.getApplication()).currUser.getUid();
+    }
 
 
 	@Override
@@ -107,30 +83,23 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
 	  @Override
 	  public void onTabSelected(ActionBar.Tab tab,
 	      FragmentTransaction fragmentTransaction) {
-	    // When the given tab is selected, show the tab contents in the
-	    // container view.
-		
+		  System.out.println("ontabsel called");
+		  // When the given tab is selected, show the tab contents in the
+		  // container view.
 		  if(tab.getTag().equals(R.string.tab1title)) {
-			  System.out.println("all tab created");
-			  if(allChatFragment == null) 
-				  allChatFragment  = new AllChatFragment();
-		     
-			    getFragmentManager().beginTransaction()
+			  if(allChatFragment == null) allChatFragment  = new AllChatFragment();
+			 
+			  System.out.println("chat fragment on view");
+			  getFragmentManager().beginTransaction()
 			        .replace(R.id.fragment_container, allChatFragment).commit();
 			  
 		  } else if(tab.getTag().equals(R.string.tab2title)) {
-			  System.out.println("mingling tab created");
-			  if(ongoingChatFragment == null)
-			  	ongoingChatFragment = new OngoingChatFragment();
+			  if(ongoingChatFragment == null) ongoingChatFragment = new OngoingChatFragment();
+			  
 			  getFragmentManager().beginTransaction()
 		        .replace(R.id.fragment_container, ongoingChatFragment).commit();
-			  
-		  }
-	    
+		  }	    
 	  }
-	  
-	  
-	
 }
 
 

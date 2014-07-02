@@ -27,6 +27,8 @@ import java.util.ArrayList;
 
 
 
+
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -51,6 +53,8 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     private Context currContext = null;
 
     public HttpHelper(String url, Context context){
+    	
+    	//Set up default settings for socket communication with server
         try {
            //SocketIO.setDefaultSSLSocketFactory(SSLContext.getDefault());
             socket = new SocketIO(url);
@@ -64,12 +68,19 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
             System.out.println("Socket is not availiable");
             return;
         }
-        //String cook  = CookieManager.;
-        System.out.println(socket.toString());
+
         socket.addHeader("Cookie", "cookie");
         currContext = context;
 
-        IOCallback sth  = new IOCallback() {
+        
+    }
+    
+    /*
+     * Method for establishing socket connection
+     * Contains actions required by client on different events
+     */
+    public void connectSocket(){
+    	IOCallback iocb  = new IOCallback() {
 
             @Override
             public void onMessage(String data, IOAcknowledge ack) {
@@ -97,9 +108,33 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
             public void on(String event, IOAcknowledge ack, Object... args) {
                 System.out.println("Server triggered event '" + event + "'");
                 
-                /*if(event.equals("get_list_return")){
-                    ((HuntActivity)currContext).showList((JSONArray)args[0]);
-                }*/
+                //When server asks for UID of current user, return it with RID
+                if(event.equals("uid_query")){
+                	System.out.println("uid_query_recved");
+                	String uid = ((HuntActivity)currContext).getMyUid();
+                	JSONObject uid_obj = new JSONObject();
+                	try {
+						uid_obj.put("uid", uid);
+						uid_obj.put("rid", 42);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                	socket.emit("uid_query_result", uid_obj);
+                
+                //When server sends confirmation that the message sent by user is received,
+                //update ChatRoom's message list
+                } else if(event.equals("msg_from_user_conf")){
+                	JSONObject msg_conf_obj = (JSONObject) args[0];
+                	((ChatroomActivity)currContext).sendMessageConf(msg_conf_obj);
+                
+                //When server delivers a message from other user, update ChatRoom's message list
+                //and send confirmation to server so that it knows client received the message
+                } else if(event.equals("msg_to_user")){
+                	JSONObject recv_msg_obj = (JSONObject) args[0];
+                	((ChatroomActivity)currContext).recvMessage(recv_msg_obj);
+                	socket.emit("msg_to_user_conf");
+                }
             }
 
             @Override
@@ -112,21 +147,9 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
                 }
             }
         };
-        socket.connect(sth);
+        socket.connect(iocb);
     }
     
-    
-    public void mola(String id){
-    	JSONObject temp = new JSONObject();
-    	try {
-			temp.put("uid", id);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-    	System.out.println(temp.toString());
-    	socket.emit("sunkyu", temp);
-    }
-
     /*
     * Sends login info along to the server, and hopefully what will be returned
     * is the unique id of the user as well as some other useful information
@@ -260,6 +283,20 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 		    	}
     		}
     	}).start();
+    }
+    
+    //HttpHelper method to deliver user's message to server
+    public void sendMessageToServer(String send_uid, String recv_uid, String msg, int msg_counter){
+    	JSONObject msgObject = new JSONObject();
+        try {
+            msgObject.put("send_uid", send_uid);
+            msgObject.put("recv_uid", recv_uid);
+            msgObject.put("msg", msg);
+            msgObject.put("msg_counter", msg_counter);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        socket.emit("msg_from_user", msgObject);
     }
 
     //@Override

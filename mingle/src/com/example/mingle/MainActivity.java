@@ -5,19 +5,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ContentResolver;
@@ -43,15 +37,15 @@ import org.json.JSONObject;
 
 public class MainActivity extends ActionBarActivity implements ConnectionCallbacks, OnConnectionFailedListener {
     //public static int REQUEST_CODE = 1;
-    private Bitmap taken_photo_bitmap;
-    private ArrayList<Bitmap> photo_list;
-    private String sex_option;
-    private String comment_option;
-    private int num_option;
-    private float latitude;
-    private float longitude;
+    private Bitmap taken_photo_bitmap;		//Bitmap to save photo just taken
+    private ArrayList<Bitmap> photo_list;	//List of user's photos
+    private String sex_option;				//Sex identity of user
+    private String comment_option;			//Comment written by user
+    private int num_option;					//Number of people with user
+    private float latitude;					//GPS latitude of user
+    private float longitude;				//GPS longitude of user
     
-
+    //Server Address
     private static final String server_url = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080";
     
     private GoogleApiClient mGoogleApiClient;
@@ -117,12 +111,12 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
         setContentView(R.layout.activity_main);
         
         
-            	((MingleApplication) this.getApplication()).initHelper = new HttpHelper(server_url, this);
+        //Initialize HttpHelper that supports HTTP GET/POST requests and socket connection
+        ((MingleApplication) this.getApplication()).connectHelper = new HttpHelper(server_url, this);
+        //Initialize MingleUser object that stores current user's info
+        ((MingleApplication) this.getApplication()).currUser = new MingleUser();
           
-        
-        
-        
-        
+        //Initialize Google API
         mGoogleApiClient = new GoogleApiClient.Builder(this)
         .addConnectionCallbacks(this)
         .addOnConnectionFailedListener(this)
@@ -153,22 +147,25 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
         //this.takePicture();
     }
 
+    //On user creation request, get user's info and send request to server
     public void userCreateButtonPressed(View view) {
-        //hard coded
+        //hard coded. need to be replaced later on
         comment_option = "hi";
         num_option = 4;
         latitude = (float)4.11;
         longitude = (float)4.11;
+        
+        //Check validity of user input and send user creation request to server
         //if (new_user.isValid()) {
-        ((MingleApplication) this.getApplication()).initHelper.userCreateRequest(photo_list, comment_option, sex_option, num_option, longitude, latitude);
+        ((MingleApplication) this.getApplication()).connectHelper.userCreateRequest(photo_list, comment_option, sex_option, num_option, longitude, latitude);
        //} else {
        //    System.out.println("The user is not valid.");
        //}
     }
 
-    //Create Mingle User and join Mingle Market
+    //Update MingleUser info and join Mingle Market
+    //Called when user creation request confirmation returns from server
     public void joinMingle(JSONObject userData) {
-        ((MingleApplication) this.getApplication()).currUser = new MingleUser();
         try {
             System.out.println(userData.toString());
             ((MingleApplication) this.getApplication()).currUser.addPhoto(taken_photo_bitmap);
@@ -178,12 +175,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
             e.printStackTrace();
         }
         
-        try{
-        	((MingleApplication)this.getApplication()).initHelper.mola(userData.getString("UID"));
-        } catch (JSONException e){
-        	e.printStackTrace();
-        }
-        	
+        //Start activity for Mingle Market
         Intent i = new Intent(this, HuntActivity.class);
         startActivity(i);
     }

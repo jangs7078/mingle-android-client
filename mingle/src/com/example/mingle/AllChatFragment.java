@@ -1,7 +1,6 @@
 package com.example.mingle;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,35 +29,44 @@ import android.view.ViewGroup;
 
 public class AllChatFragment extends Fragment {
   public static final String ARG_SECTION_NUMBER = "placeholder_text";
+  public final static String WHICH_USER = "com.example.mingle.USER_SEL";	//Intent data to pass on when new Chatroom Activity started
 
-  public SwipeListView allchatlistview;
-	private ItemAdapter adapter;
-	private List<ItemRow> itemData;
-  private Activity parent;
+  public SwipeListView allchatlistview;	//Listview for chattable users
+  private ArrayList<ChattableUser>user_list;
+  private AllChatAdapter adapter;
   
+  private Activity parent;	//Parent Activity: HuntActivity
+  /*
+  private void populateList() {
+	  if(userData.size() == 0) {
+		  ArrayList<JSONObject> users = ((MingleApplication) parent.getApplication()).currUser.getUsers();
+		  for(int i = 0 ; i < users.size(); i++) {
+	          try {
+	              JSONObject shownUser = users.get(i);
+	              userData.add(new ItemRow(shownUser.getString("COMM") + " " + shownUser.getString("NUM"), (Drawable) getResources().getDrawable(R.drawable.ic_launcher) ));
+	          } catch (JSONException e){
+	              e.printStackTrace();
+	          }
+	      }     
+	  }
+	  
+  }*/
   
   
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
 	  parent = getActivity();
-	  
-	  System.out.println();
+
 	  
 	  View rootView = inflater.inflate(R.layout.fragment_all_chat, container, false);
 	  
-	  System.out.println(parent.toString());
-	  System.out.println("Things are not going well...");
 	  allchatlistview=  (SwipeListView)(rootView.findViewById(R.id.All));
-	  
-	  System.out.println("Things are not going well..1.");
-	  System.out.println(allchatlistview.toString() + " fdsaaaaaaaaaaaaaaaaa");
-      itemData=new ArrayList<ItemRow>();
-      adapter=new ItemAdapter(parent, R.layout.custom_row,itemData);
+      user_list = ((MingleApplication) parent.getApplication()).currUser.getChattableUsers();
+      //populateList();
+      adapter=new AllChatAdapter(parent, R.layout.allchat_row,user_list);
 	  
       
-      // Loads new matches
-      new LoadDataTask(parent.getApplication(), 10).execute();
       
       final Activity curActivity = parent;
       
@@ -81,11 +89,11 @@ public class AllChatFragment extends Fragment {
   
           @Override
           public void onStartOpen(int position, int action, boolean right) {
-              Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));
-              Intent i = new Intent(curActivity, ChatroomActivity.class);
-              curActivity.startActivity(i);
+              Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));         
+              Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);
+              chat_intent.putExtra(WHICH_USER, position);
+              curActivity.startActivity(chat_intent);
               allchatlistview.openAnimate(position); //when you touch front view it will open
-             
           }
   
           @Override
@@ -131,11 +139,19 @@ public class AllChatFragment extends Fragment {
           }
       });
       
-      System.out.println("Allchatview create complete");
+      //Load first 10 chattable users
+	  new LoadDataTask(parent.getApplication(), 10).execute();
+      
+      System.out.println("AllchatFrag oncreate compleate");
     return rootView;
   }
   
-  protected class LoadDataTask extends AsyncTask<Void, Void, Void> {
+  /*public void loadNewMatches(Activity par) {
+	  parent = par;
+	  new LoadDataTask(parent.getApplication(), 10).execute();
+  }*/
+  
+  private class LoadDataTask extends AsyncTask<Void, Void, Void> {
   	
   	private Application curApp;
   	
@@ -155,7 +171,7 @@ public class AllChatFragment extends Fragment {
 
 	        
 			MingleUser currUser = ((MingleApplication) curApp).currUser;
-      	((MingleApplication) curApp).initHelper.requestUserList(currUser.getUid(), currUser.getSex(), 
+			((MingleApplication) curApp).connectHelper.requestUserList(currUser.getUid(), currUser.getSex(), 
 					currUser.getLat(), currUser.getLong(), currUser.getDist(), load_num);
 
 			return null;
@@ -193,7 +209,7 @@ public class AllChatFragment extends Fragment {
       return (int) px;
   }
   
-  /* Method name: showList
+  /* 
    * Retrieve data from HttpHelper. Content of data is the list of nearby users of opposite sex.
    * This method also appends the new data to the list and shows them on the screen.
    */
@@ -203,10 +219,8 @@ public class AllChatFragment extends Fragment {
       for(int i = 0 ; i < listData.length(); i++) {
           try {
               JSONObject shownUser = listData.getJSONObject(i);
-              ((MingleApplication) parent.getApplication()).currUser.addUser(shownUser);
-             
-              
-              itemData.add(new ItemRow(shownUser.getString("COMM") + " " + shownUser.getString("NUM"), (Drawable) getResources().getDrawable(R.drawable.ic_launcher) ));
+              ChattableUser new_user = new ChattableUser(shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) getResources().getDrawable(R.drawable.ic_launcher));
+              ((MingleApplication) parent.getApplication()).currUser.addChattableUser(new_user);
           } catch (JSONException e){
               e.printStackTrace();
           }

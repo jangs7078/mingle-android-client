@@ -16,14 +16,10 @@ import android.widget.ListView;
 public class OngoingChatFragment extends Fragment {
 
 	public ListView currentlychattinglistview;
-	private ArrayList<String> currentItemData;
-	private ArrayAdapter<String> currentlistAdapter ;
+	private ArrayList<ChatRoom> chat_room_list;
+	private ChatRoomAdapter adapter;
 	
 	private Activity parent; 
-	
-	public void addItem(String newChatter) { 
-		currentItemData.add(newChatter);
-	}
 	
 	@Override
 	  public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
@@ -35,11 +31,11 @@ public class OngoingChatFragment extends Fragment {
 		currentlychattinglistview= (ListView)(rootView.findViewById(R.id.mingling)) ;
 		
         // Stores 
-        currentItemData = new ArrayList<String>();
-        currentlistAdapter = new ArrayAdapter<String>(parent, android.R.layout.simple_list_item_1, currentItemData);
+		chat_room_list = ((MingleApplication) parent.getApplication()).currUser.getChatRoomList();;
+        adapter = new ChatRoomAdapter(parent, R.layout.chatroom_row, chat_room_list);
         
         // Set the ArrayAdapter as the ListView's adapter.  
-        currentlychattinglistview.setAdapter( currentlistAdapter );        
+        currentlychattinglistview.setAdapter( adapter );        
         
 		return rootView;
 	}
