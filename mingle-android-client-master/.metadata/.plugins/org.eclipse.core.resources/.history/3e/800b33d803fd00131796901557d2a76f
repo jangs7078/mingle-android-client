@@ -1,0 +1,49 @@
+package com.example.mingle;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+public class OngoingChatFragment extends Fragment {
+
+	private ListView currentlychattinglistview;
+	private ArrayList<ItemRow> currentItemData;
+	private ArrayAdapter<ItemRow> currentlistAdapter ;
+	
+	private Activity parent; 
+	public OngoingChatFragment(Activity act) {
+		parent = act; 
+		
+	}
+	
+	
+	public void addItem(ItemRow newChatter) { 
+		currentItemData.add(newChatter);
+		
+		
+	}
+	
+	@Override
+	  public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+		currentlychattinglistview=(ListView) parent.findViewById(R.id.mingling);
+		
+		ArrayList<String> sth = new ArrayList<String>();
+        // Stores 
+        currentItemData = new ArrayList<ItemRow>();
+        currentlistAdapter = new ItemAdapter(parent, R.layout.custom_row, sth);
+        
+        // Set the ArrayAdapter as the ListView's adapter.  
+        currentlychattinglistview.setAdapter( currentlistAdapter );        
+        
+		return currentlychattinglistview;
+	}
+	
+	
+}
