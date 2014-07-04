@@ -121,22 +121,8 @@ public class MainActivity extends ActionBarActivity {
     }
     
     
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        
-        
-        //Initialize HttpHelper that supports HTTP GET/POST requests and socket connection
-        ((MingleApplication) this.getApplication()).connectHelper = new HttpHelper(server_url, this);
-        //Initialize MingleUser object that stores current user's info
-        ((MingleApplication) this.getApplication()).currUser = new MingleUser();
-          
-        
-       
-        // Get the user's current location
-        getCurrentLocation();
-        
+    private void initializeUIViews() {
+    	// Sets up the radiobutton
         sex_option = "M";
         RadioGroup radioSexGroup = (RadioGroup) findViewById(R.id.radioSex);
         // get selected radio button from radioGroup
@@ -148,6 +134,25 @@ public class MainActivity extends ActionBarActivity {
             	else sex_option="M";
             }
         });
+    }
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        MingleApplication mingleApp = (MingleApplication) this.getApplication();
+        
+        //Initialize HttpHelper that supports HTTP GET/POST requests and socket connection
+        mingleApp.connectHelper = new HttpHelper(server_url, this);
+        //Initialize MingleUser object that stores current user's info
+        mingleApp.currUser = new MingleUser();
+        // Initialize the database helper that manages local storage
+        mingleApp.dbHelper = new DatabaseHelper(this);
+
+        // Get the user's current location
+        getCurrentLocation();
+        
         this.takePicture();
     }
 
