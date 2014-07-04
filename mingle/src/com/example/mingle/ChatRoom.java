@@ -13,10 +13,24 @@ class ChatRoom{
 	
 	private ArrayList<JSONObject> msg_list;
 	private String recv_uid;
+	private boolean just_created;
 	
 	public ChatRoom(String uid){
 		msg_list =  new ArrayList<JSONObject>();
 		recv_uid = uid;
+		just_created = true;
+	}
+	
+	public boolean isJustCreated(){
+		return just_created;
+	}
+	
+	public void setChatActive(){
+		just_created = false;
+	}
+	
+	public String getRecvUid(){
+		return recv_uid;
 	}
 	
 	public void addMsg(String send_uid, String msg, int msg_counter, int status){

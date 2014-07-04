@@ -40,6 +40,12 @@ class MingleUser extends MingleApplication {
         setDist(dist_lim_var);
     }
     
+    public void deleteUserAtIndex(int index) {
+    	if(index < users.size()) {
+    		users.remove(index);
+    	}
+    }
+    
     public void addPhoto(Bitmap photo) {
     	photos.add(photo);
     }

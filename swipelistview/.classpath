@@ -6,5 +6,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="src" path="/google-play-services_lib"/>
+	<classpathentry kind="lib" path="C:/Users/Tempnote/Documents/GitHub/cw-android/Fragments/EU4You_6/libs/android-support-v4.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -29,7 +29,7 @@ import android.view.ViewGroup;
 
 public class AllChatFragment extends Fragment {
   public static final String ARG_SECTION_NUMBER = "placeholder_text";
-  public final static String WHICH_USER = "com.example.mingle.USER_SEL";	//Intent data to pass on when new Chatroom Activity started
+  public final static String USER_UID = "com.example.mingle.USER_SEL";	//Intent data to pass on when new Chatroom Activity started
 
   public SwipeListView allchatlistview;	//Listview for chattable users
   private ArrayList<ChattableUser>user_list;
@@ -72,11 +72,28 @@ public class AllChatFragment extends Fragment {
   
           @Override
           public void onStartOpen(int position, int action, boolean right) {
-              Log.d("swipe", String.format("onStartOpen %d - action %d", position, action));         
-              Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);
-              chat_intent.putExtra(WHICH_USER, position);
-              curActivity.startActivity(chat_intent);
+              Log.d("swipe", String.format("onStartOpen %d - action %d", position, action)); 
               allchatlistview.openAnimate(position); //when you touch front view it will open
+              MingleUser currentUser = ((MingleApplication) parent.getApplication()).currUser;
+              if(action== 0) {
+	             
+	              ChattableUser chat_user_obj = currentUser.getChattableUser(position);
+	              String chat_user_uid = chat_user_obj.getUid();
+	              
+	              if( currentUser.getChatRoom(chat_user_uid) == null){
+	            	  //Instantiate a chat room
+	            	  currentUser.addChatRoom(chat_user_obj.getUid());
+	
+	              }
+	              
+	              Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);
+	              chat_intent.putExtra(USER_UID, chat_user_obj.getUid());
+	              curActivity.startActivity(chat_intent);
+              } else { // Deletes the user at given index
+            	  //currentUser.deleteUserAtIndex(position);
+            	  //updateUserList();
+              }
+              
           }
   
           @Override
@@ -106,7 +123,7 @@ public class AllChatFragment extends Fragment {
       
       //These are the swipe listview settings. you can change these
       //setting as your requirement
-      allchatlistview.setSwipeMode(SwipeListView.SWIPE_MODE_LEFT); // there are five swiping modes
+      allchatlistview.setSwipeMode(SwipeListView.SWIPE_MODE_BOTH); // there are five swiping modes
       allchatlistview.setSwipeActionLeft(SwipeListView.SWIPE_ACTION_REVEAL); //there are four swipe actions
       allchatlistview.setSwipeActionRight(SwipeListView.SWIPE_ACTION_REVEAL);
       allchatlistview.setOffsetLeft(convertDpToPixel(0f)); // left side offset
@@ -165,7 +182,6 @@ public class AllChatFragment extends Fragment {
 
 			// Call onLoadMoreComplete when the LoadMore task, has finished
 			allchatlistview.onLoadMoreComplete();
-
 			super.onPostExecute(result);
 		}
 
@@ -189,6 +205,14 @@ public class AllChatFragment extends Fragment {
       return (int) px;
   }
   
+  public void updateUserList(){
+  	parent.runOnUiThread(new Runnable() {
+  		public void run() {
+  			adapter.notifyDataSetChanged();
+  		}
+  	});
+  }
+  
   /* 
    * Retrieve data from HttpHelper. Content of data is the list of nearby users of opposite sex.
    * This method also appends the new data to the list and shows them on the screen.
@@ -199,12 +223,13 @@ public class AllChatFragment extends Fragment {
       for(int i = 0 ; i < listData.length(); i++) {
           try {
               JSONObject shownUser = listData.getJSONObject(i);
-              ChattableUser new_user = new ChattableUser(shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) getResources().getDrawable(R.drawable.ic_launcher));
+              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) getResources().getDrawable(R.drawable.ic_launcher));
               ((MingleApplication) parent.getApplication()).currUser.addChattableUser(new_user);
           } catch (JSONException e){
               e.printStackTrace();
           }
-      }        
+      }
+    //updateUserList();
   }
   
 }

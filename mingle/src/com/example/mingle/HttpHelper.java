@@ -29,6 +29,10 @@ import java.util.ArrayList;
 
 
 
+
+
+
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -51,6 +55,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 
     private SocketIO socket = null;
     private Context currContext = null;
+    private ArrayList<ChatRoom> chat_room_list;
 
     public HttpHelper(String url, Context context){
     	
@@ -126,13 +131,41 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
                 //update ChatRoom's message list
                 } else if(event.equals("msg_from_user_conf")){
                 	JSONObject msg_conf_obj = (JSONObject) args[0];
-                	((ChatroomActivity)currContext).sendMessageConf(msg_conf_obj);
+                	try{
+                		String msg_recv_uid = msg_conf_obj.getString("recv_uid");
+                		int msg_recv_counter = Integer.parseInt(msg_conf_obj.getString("msg_counter"));
+                		String msg_ts = msg_conf_obj.getString("ts");
+                		((MingleApplication) currContext.getApplicationContext()).currUser.updateMsgToRoom(msg_recv_uid, msg_recv_counter, msg_ts);
+                	} catch (JSONException e){
+                		e.printStackTrace();
+                	}
+                	if(currContext instanceof ChatroomActivity){
+                		System.out.println("on chatroom activity updating list");
+                		((ChatroomActivity)currContext).updateMessageList();
+                	}
+                	//
                 
                 //When server delivers a message from other user, update ChatRoom's message list
                 //and send confirmation to server so that it knows client received the message
                 } else if(event.equals("msg_to_user")){
                 	JSONObject recv_msg_obj = (JSONObject) args[0];
-                	((ChatroomActivity)currContext).recvMessage(recv_msg_obj);
+					try {
+						String chat_user_uid = recv_msg_obj.getString("send_uid");
+					
+						if( ((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid) == null){
+							//Instantiate a chat room
+							((MingleApplication) currContext.getApplicationContext()).currUser.addChatRoom(chat_user_uid);
+                    	}
+                		((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).addRecvMsg(chat_user_uid,recv_msg_obj.getString("msg"),recv_msg_obj.getString("ts"));
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					if(currContext instanceof ChatroomActivity){
+                		System.out.println("on chatroom activity updating list");
+                		((ChatroomActivity)currContext).updateMessageList();
+                	}
                 	socket.emit("msg_to_user_conf");
                 }
             }
@@ -286,18 +319,29 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     }
     
     //HttpHelper method to deliver user's message to server
-    public void sendMessageToServer(String send_uid, String recv_uid, String msg, int msg_counter){
+    public void sendMessageToServer(String send_uid, String recv_uid, String msg, int msg_counter, boolean response_msg){
     	JSONObject msgObject = new JSONObject();
         try {
             msgObject.put("send_uid", send_uid);
             msgObject.put("recv_uid", recv_uid);
             msgObject.put("msg", msg);
             msgObject.put("msg_counter", msg_counter);
+            
+            ChatRoom curr_chatroom = ((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(recv_uid);
+            if(curr_chatroom.isJustCreated()){
+            	msgObject.put("identity", 2);
+            	curr_chatroom.setChatActive();
+            } else if(response_msg){
+            	msgObject.put("identity", 1);
+            } else {
+            	msgObject.put("identity", 0);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         socket.emit("msg_from_user", msgObject);
     }
+    
 
     //@Override
     protected Integer doInBackground(String... urls) {

@@ -42,18 +42,13 @@ public class ChatroomActivity extends ListActivity {
         
         
         Intent intent = getIntent();
-        int user_pos = intent.getExtras().getInt(AllChatFragment.WHICH_USER);
+        recv_uid = intent.getExtras().getString(AllChatFragment.USER_UID);
         
         //Set basic information required for this chat room
         send_uid = ((MingleApplication) this.getApplication()).currUser.getUid();
-		ChattableUser chat_user_obj = ((MingleApplication) this.getApplication()).currUser.getChattableUser(user_pos);
-		//recv_uid = chat_user_obj.getString("UID");
 		//for testing purpose, set myself as receiver
-		recv_uid = send_uid;
+		//recv_uid = send_uid;
 		msg_counter = -1;
-		
-		//Instantiate a chat room
-		((MingleApplication) this.getApplication()).currUser.addChatRoom(recv_uid);
 		
 		//Associate this chat room's message list to adapter
 		adapter=new MsgAdapter(this,
@@ -76,29 +71,32 @@ public class ChatroomActivity extends ListActivity {
 		System.out.println("msg sent!");
 		System.out.println(send_uid + " "+ recv_uid+" "+msg_counter);
 		
-		//Save MSG and show it is in the process of getting sent.
-		((MingleApplication) this.getApplication()).currUser.addMsgToRoom(recv_uid, send_uid, SMS, msg_counter, 0);
-		adapter.notifyDataSetChanged();
-		
-		//Send MSG to Server
-		((MingleApplication) this.getApplication()).connectHelper.sendMessageToServer(send_uid, recv_uid, SMS, msg_counter);
-		
-		txtSMS.setText("",BufferType.NORMAL);
-	}
-    
-    public void sendMessageConf(JSONObject msg_conf_obj){
-    	try {
-			String msg_recv_uid = msg_conf_obj.getString("recv_uid");
-			int msg_recv_counter = Integer.parseInt(msg_conf_obj.getString("msg_counter"));
-			String msg_ts = msg_conf_obj.getString("ts");
-			if(recv_uid.equals(msg_recv_uid)){
-				((MingleApplication) this.getApplication()).currUser.updateMsgToRoom(msg_recv_uid, msg_recv_counter, msg_ts);
-			    adapter.notifyDataSetChanged();
+		boolean response_msg = false;
+		ArrayList<JSONObject> list = ((MingleApplication) this.getApplication()).currUser.getChatRoom(recv_uid).getMsgList();
+		try {
+			if(list.get(list.size()-1).getString("send_uid") != ((MingleApplication) this.getApplication()).currUser.getUid()){
+				response_msg = true;
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//Save MSG and show it is in the process of getting sent.
+		((MingleApplication) this.getApplication()).currUser.addMsgToRoom(recv_uid, send_uid, SMS, msg_counter, 0);
+		adapter.notifyDataSetChanged();
+		
+		//Send MSG to Server
+		((MingleApplication) this.getApplication()).connectHelper.sendMessageToServer(send_uid, recv_uid, SMS, msg_counter,response_msg);
+		
+		txtSMS.setText("",BufferType.NORMAL);
+	}
+    
+    public void updateMessageList(){
+    	runOnUiThread(new Runnable() {
+    		public void run() {
+    			adapter.notifyDataSetChanged();
+    		}
+    	});
     }
 
     public void recvMessage(JSONObject recv_msg_obj){

@@ -6,6 +6,7 @@ import com.fortysevendeg.swipelistview.SwipeListView;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class OngoingChatFragment extends Fragment {
+	public final static String USER_UID = "com.example.mingle.USER_SEL";	//Intent data to pass on when new Chatroom Activity started
 
 	public ListView currentlychattinglistview;
 	private ArrayList<ChatRoom> chat_room_list;
@@ -37,11 +39,17 @@ public class OngoingChatFragment extends Fragment {
         adapter = new ChatRoomAdapter(parent, R.layout.chatroom_row, chat_room_list);
         adapter.notifyDataSetChanged();
         
+        final Activity curActivity = parent;
         currentlychattinglistview.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 // TODO Auto-generated method stub
+            	ChatRoom curr_chatroom = chat_room_list.get(position);
+        			
+                Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);
+                chat_intent.putExtra(USER_UID, curr_chatroom.getRecvUid());
+                curActivity.startActivity(chat_intent);
             	System.out.println(parent + "   " + v + "   " + position + "   " + id);
             }
 

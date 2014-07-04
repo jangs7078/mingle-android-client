@@ -2,22 +2,24 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="" key="selection"/>
+		<item value="Chatroom" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="icon"/>
-			<item value="item"/>
-			<item value="context"/>
-			<item value="initHelper"/>
-			<item value="socket"/>
-			<item value="applic"/>
-			<item value="parent"/>
-			<item value="getApplic"/>
+			<item value="chatroom"/>
+			<item value="curapp"/>
+			<item value="connectHelper"/>
+			<item value="mingle"/>
+			<item value="null"/>
+			<item value="change"/>
+			<item value="user_list"/>
+			<item value="ItemRow"/>
 		</list>
 		<list key="replacehistory">
+			<item value="connectHelper"/>
+			<item value="userData"/>
 			<item value="allchatlistview"/>
 		</list>
 	</section>

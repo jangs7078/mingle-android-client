@@ -22,25 +22,25 @@ public final class R {
 		public static final int swipeOpenOnLongPress = 0x7f01008e;
 	}
 	public static final class color {
-		public static final int black = 0x7f06001d;
-		public static final int dark_slate_gray = 0x7f06001a;
-		public static final int gray_1 = 0x7f06001c;
-		public static final int gray_2 = 0x7f06001b;
+		public static final int black = 0x7f07001d;
+		public static final int dark_slate_gray = 0x7f07001a;
+		public static final int gray_1 = 0x7f07001c;
+		public static final int gray_2 = 0x7f07001b;
 	}
 	public static final class drawable {
 		public static final int costum_progress_bar = 0x7f020073;
 	}
 	public static final class id {
-		public static final int both = 0x7f07002c;
-		public static final int choice = 0x7f070031;
-		public static final int dismiss = 0x7f070030;
-		public static final int left = 0x7f07002e;
-		public static final int load_more_footer = 0x7f07006a;
-		public static final int load_more_progressBar = 0x7f07006c;
-		public static final int none = 0x7f070000;
-		public static final int reveal = 0x7f07002f;
-		public static final int right = 0x7f07002d;
-		public static final int top_line = 0x7f07006b;
+		public static final int both = 0x7f08002c;
+		public static final int choice = 0x7f080031;
+		public static final int dismiss = 0x7f080030;
+		public static final int left = 0x7f08002e;
+		public static final int load_more_footer = 0x7f08006a;
+		public static final int load_more_progressBar = 0x7f08006c;
+		public static final int none = 0x7f080000;
+		public static final int reveal = 0x7f08002f;
+		public static final int right = 0x7f08002d;
+		public static final int top_line = 0x7f08006b;
 	}
 	public static final class layout {
 		public static final int load_more_footer = 0x7f03001f;
