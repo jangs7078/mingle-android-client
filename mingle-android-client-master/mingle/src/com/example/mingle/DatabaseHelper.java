@@ -102,6 +102,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		  return cursor;
 	  }
 	  
+	  // returns the previously used MYUID
+	  // use this ONLY IF you can assert that this app is used once before
 	  public String getMyUID(){
 		  SQLiteDatabase db = this.getReadableDatabase();
 		  String[] myuid_columns={DatabaseHelper.COLUMN_MYUID};
@@ -109,6 +111,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		  return cursor.getString(0);
 	  }
 	  
+	  // returns false if there is already a row inside MYUID table, true otherwise
+	  // i.e. using first time -> true, else -> false
 	  public boolean isFirst(){
 		  SQLiteDatabase db = this.getReadableDatabase();
 		  String[] myuid_columns={DatabaseHelper.COLUMN_MYUID};

@@ -224,7 +224,7 @@ public class AllChatFragment extends Fragment {
               e.printStackTrace();
           }
       }
-    //updateUserList();
+    updateUserList();
   }
   
 }
