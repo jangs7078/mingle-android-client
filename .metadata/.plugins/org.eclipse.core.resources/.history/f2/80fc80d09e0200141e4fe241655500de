@@ -1,0 +1,18 @@
+package com.example.mingle;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+
+public class DBDataSource {
+	private SQLiteDatabase database;
+	private DatabaseHelper dbHelper;
+	
+	public DBDataSource(Context context){
+		dbHelper = new DatabaseHelper(context);
+	}
+	
+	
+}

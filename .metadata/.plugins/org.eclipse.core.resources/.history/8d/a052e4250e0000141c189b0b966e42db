@@ -1,0 +1,36 @@
+package com.example.mingle;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+class ChatRoom{
+
+	private ArrayList<JSONObject> msg_list;
+	
+	
+	public void addMsg(JSONObject msg_obj){
+		msg_list.add(msg_obj);
+		Collections.sort(msg_list, new MsgComparator());
+	}
+	
+	public ArrayList<JSONObject> getMsgList(){
+		return msg_list;
+	}
+	
+}
+
+class MsgComparator implements Comparator<JSONObject> {
+    public int compare(JSONObject msg1, JSONObject msg2) {
+    	try {
+	        return msg1.getString("TS").compareTo(msg2.getString("TS"));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return -1;
+    }
+}

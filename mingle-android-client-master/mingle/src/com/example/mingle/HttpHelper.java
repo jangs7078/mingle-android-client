@@ -311,6 +311,16 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	baseURL += "loc_lat=" + (new Float(latitude)).toString() + "&";
     	baseURL += "list_num=" + (new Integer(num_of_users)).toString();
     	
+    	ArrayList<ChattableUser> cu_list = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUsers();
+        int cu_list_size = cu_list.size();
+        if(cu_list.size() > 0) baseURL += "&";
+    	for (int i = 0; i < cu_list_size - 1; i++){
+        	//uid_list.add(new BasicNameValuePair(String.valueOf(i), cu_list.get(i).getUid()));
+        	baseURL += "my_list["+i+"]=" + cu_list.get(i).getUid() + "&";
+        }
+        if(cu_list.size() > 0)baseURL += "my_list["+cu_list_size+"]="+cu_list.get(cu_list_size-1).getUid();
+        else baseURL += "&my_list[0]=hello&my_list[1]=hi";
+        
     	final String cps = baseURL;
        
     	//Start Thread that receives HTTP Response
@@ -339,7 +349,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 		    	}
     		}
     	}).start();
-    	
+    	/*
     	baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
     	baseURL += "get_list2?";
     	baseURL += "sex=" + sex + "&";
@@ -397,7 +407,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 					e.printStackTrace();
 				}
     		}
-    	}).start();
+    	}).start();*/
     }
     
     //HttpHelper method to deliver user's message to server
