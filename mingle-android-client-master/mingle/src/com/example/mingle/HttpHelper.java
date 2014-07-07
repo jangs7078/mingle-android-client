@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 
 
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -151,8 +152,8 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
                 	JSONObject recv_msg_obj = (JSONObject) args[0];
 					try {
 						String chat_user_uid = recv_msg_obj.getString("send_uid");
-					
-						if( ((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid) == null){
+						ChatRoom chatroom = ((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid);
+						if(chatroom  == null){
 							//Instantiate a chat room
 							((MingleApplication) currContext.getApplicationContext()).currUser.addChatRoom(chat_user_uid);
 							((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).setChatActive();
@@ -227,7 +228,9 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 				}
 				
 				try{
+					 
 		    		JSONObject user_info = new JSONObject(HttpResponseBody(response));
+		    		((MingleApplication) ((MainActivity)currContext).getApplication()).dbHelper.setMyUID(user_info.getString("UID"));
 		        	((MainActivity)currContext).joinMingle(user_info);
 		    	} catch (JSONException je){
 		    		je.printStackTrace();
@@ -269,18 +272,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     }
 
     public void requestUserList(String uid, String sex, float latitude, float longitude, int dist_lim, int num_of_users) {
-        /*JSONObject userListRequestObject = new JSONObject();
-        try {
-            userListRequestObject.put("uid", uid);
-            userListRequestObject.put("sex", sex);
-            userListRequestObject.put("loc_lat", loc_lat);
-            userListRequestObject.put("loc_long", loc_long);
-            userListRequestObject.put("dist_lim", dist_lim);
-            userListRequestObject.put("list_num", num_of_users);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        socket.emit("get_list", userListRequestObject);*/
+        
     	String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
     	baseURL += "get_list?";
     	baseURL += "sex=" + sex + "&";

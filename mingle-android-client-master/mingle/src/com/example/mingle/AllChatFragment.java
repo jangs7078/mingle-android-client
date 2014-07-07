@@ -81,8 +81,9 @@ public class AllChatFragment extends Fragment {
               
               if( currentUser.getChatRoom(chat_user_uid) == null){
             	  //Instantiate a chat room
-            	  currentUser.addChatRoom(chat_user_obj.getUid());
-
+            	  currentUser.addChatRoom(chat_user_uid);
+            	  // Create chatroom in local sqlite
+            	  ((MingleApplication) parent.getApplication()).dbHelper.insertNewUID(chat_user_uid);
               }
               
               Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);

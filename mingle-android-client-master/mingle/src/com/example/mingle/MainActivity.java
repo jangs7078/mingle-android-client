@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View.OnClickListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.view.View;
 
@@ -34,6 +36,8 @@ import android.widget.*;
 import com.example.mingle.MingleApplication;
 
 //import com.google.android.gms.maps.model.Location;
+
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +64,12 @@ public class MainActivity extends ActionBarActivity {
             	Uri selectedImage = imageUri;
                 getContentResolver().notifyChange(selectedImage, null);
                 ImageView imageView = (ImageView) findViewById(R.id.photoView1);
+                if (imageView.getDrawable() == null) {
+                	imageView = (ImageView) findViewById(R.id.photoView2);
+                }
+                if (imageView.getDrawable() == null) {
+                	imageView = (ImageView) findViewById(R.id.photoView3);
+                }
                 ContentResolver cr = getContentResolver();
                 
                 try {
@@ -99,7 +109,7 @@ public class MainActivity extends ActionBarActivity {
     	((MingleApplication) this.getApplication()).currUser.setLat(lon);
      
     	
-    	
+    	// In case we want to register for location updates
     	/*
     	// Define a listener that responds to location updates
     	LocationListener locationListener = new LocationListener() {
@@ -134,6 +144,40 @@ public class MainActivity extends ActionBarActivity {
             	else sex_option="M";
             }
         });
+        ImageView photoView1 = (ImageView) findViewById(R.id.photoView1);
+        photoView1.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				takePicture();
+			}
+        });
+        ImageView photoView2 = (ImageView) findViewById(R.id.photoView2);
+        photoView2.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				takePicture();
+			}
+        });
+        ImageView photoView3 = (ImageView) findViewById(R.id.photoView3);
+        photoView3.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				takePicture();
+			}
+        });
+    }
+    
+    private boolean AppOnFirstTime() {
+    	DatabaseHelper db = ((MingleApplication) this.getApplication()).dbHelper;
+    	MingleApplication mingleApp = (MingleApplication) this.getApplication();
+    	if(db.isFirst()) {
+    		return true;
+    	}
+    	mingleApp.currUser.setUid(mingleApp.dbHelper.getMyUID());
+    	/*Cursor chatters = mingleApp.dbHelper.getUIDList();
+    	Cursor msgs = mingleApp.dbHelper.getMsgList();
+    	// Populate other fields with UID*/
+    	return false;
     }
     
     @Override
@@ -149,11 +193,19 @@ public class MainActivity extends ActionBarActivity {
         mingleApp.currUser = new MingleUser();
         // Initialize the database helper that manages local storage
         mingleApp.dbHelper = new DatabaseHelper(this);
-
+        
         // Get the user's current location
         getCurrentLocation();
         
-        this.takePicture();
+        // If the app is not on for the first time, start HuntActivity
+        // and populate it with data from local storage
+        if(AppOnFirstTime()) {
+        	initializeUIViews();
+        } else {
+        	//Start activity for Mingle Market
+            Intent i = new Intent(this, HuntActivity.class);
+            startActivity(i);
+        }
     }
 
     //On user creation request, get user's info and send request to server
@@ -163,6 +215,7 @@ public class MainActivity extends ActionBarActivity {
         num_option = 4;
         
         MingleUser user =  ((MingleApplication) this.getApplication()).currUser;
+        
         
         //Check validity of user input and send user creation request to server
         if (user.isValid()) {
@@ -180,9 +233,10 @@ public class MainActivity extends ActionBarActivity {
     //Update MingleUser info and join Mingle Market
     //Called when user creation request confirmation returns from server
     public void joinMingle(JSONObject userData) {
-        try {
+        
+    	try {
             System.out.println(userData.toString());
-            
+           
             ((MingleApplication) this.getApplication()).currUser.setAttributes(userData.getString("UID"), userData.getString("SEX"), userData.getInt("NUM"), userData.getString("COMM"),
                                                                                         (float)userData.getDouble("LOC_LAT"), (float)userData.getDouble("LOC_LONG"), userData.getInt("DIST_LIM"));
         } catch(JSONException e){
