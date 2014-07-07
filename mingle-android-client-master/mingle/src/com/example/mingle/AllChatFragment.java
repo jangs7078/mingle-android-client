@@ -79,12 +79,16 @@ public class AllChatFragment extends Fragment {
               ChattableUser chat_user_obj = currentUser.getChattableUser(position);
               String chat_user_uid = chat_user_obj.getUid();
               
-              if( currentUser.getChatRoom(chat_user_uid) == null){
-            	  //Instantiate a chat room
-            	  currentUser.addChatRoom(chat_user_uid);
-            	  // Create chatroom in local sqlite
-            	  ((MingleApplication) parent.getApplication()).dbHelper.insertNewUID(chat_user_uid);
-              }
+             
+              
+              //Instantiate a chat room
+              currentUser.addChatRoom(chat_user_uid);
+              // Create chatroom in local sqlite
+              ((MingleApplication) parent.getApplication()).dbHelper.insertNewUID(chat_user_uid);
+             
+           	  //Remove selected user from ChattableUser list
+           	  ((MingleApplication) parent.getApplication()).currUser.removeChattableUser(position);
+           	  ((HuntActivity)parent).listsUpdate();
               
               Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);
               chat_intent.putExtra(USER_UID, chat_user_obj.getUid());
@@ -137,6 +141,14 @@ public class AllChatFragment extends Fragment {
       
       System.out.println("AllchatFrag oncreate compleate");
     return rootView;
+  }
+  
+  public void listDataChanged(){
+	  parent.runOnUiThread(new Runnable() {
+	  		public void run() {
+	  			adapter.notifyDataSetChanged();
+	  		}
+	  });
   }
   
   public void loadNewMatches(Activity par) {

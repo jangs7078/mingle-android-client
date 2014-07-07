@@ -60,5 +60,11 @@ public class OngoingChatFragment extends Fragment {
 		return rootView;
 	}
 	
-	
+	public void listDataChanged(){
+		parent.runOnUiThread(new Runnable() {
+	  		public void run() {
+	  			adapter.notifyDataSetChanged();
+	  		}
+	  	});
+	}
 }

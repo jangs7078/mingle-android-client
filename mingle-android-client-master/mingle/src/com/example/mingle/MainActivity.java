@@ -221,7 +221,6 @@ public class MainActivity extends ActionBarActivity {
         mingleApp.currUser = new MingleUser();
         // Initialize the database helper that manages local storage
         mingleApp.dbHelper = new DatabaseHelper(this);
-        
         // Get the user's current location
         getCurrentLocation();
         
@@ -234,6 +233,7 @@ public class MainActivity extends ActionBarActivity {
             Intent i = new Intent(this, HuntActivity.class);
             startActivity(i);
         }
+        
     }
 
     
@@ -275,16 +275,16 @@ public class MainActivity extends ActionBarActivity {
         
         
         //Check validity of user input and send user creation request to server
-        if (user.isValid()) {
+        //if (user.isValid()) {
         	((MingleApplication) this.getApplication()).connectHelper.userCreateRequest(user.getPhotos(), 
         																			comment_option, 
         																			sex_option, 
         																			num_option, 
         																			user.getLong(), user.getLat());
-       } else {
+       /*} else {
     	   showInvalidUserAlert();
            System.out.println("The user is not valid.");
-       }
+       }*/
     }
 
     //Update MingleUser info and join Mingle Market
