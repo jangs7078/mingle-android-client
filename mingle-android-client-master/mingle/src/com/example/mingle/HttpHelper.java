@@ -12,6 +12,7 @@ import java.net.*;
         import io.socket.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
         import com.example.mingle.MingleUser;
         
@@ -33,19 +34,30 @@ import java.util.ArrayList;
 
 
 
+
+
+
+
+
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 //import com.hmkcode.android.vo.Person;
         import org.json.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.String;
 
 /**
@@ -156,6 +168,15 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 							//Instantiate a chat room
 							((MingleApplication) currContext.getApplicationContext()).currUser.addChatRoom(chat_user_uid);
 							((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).setChatActive();
+						
+							//Remove from User List if available
+							int pos = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUserPos(chat_user_uid);
+							if(pos >= 0){
+								((MingleApplication) currContext.getApplicationContext()).currUser.removeChattableUser(pos);
+								if(currContext instanceof HuntActivity){
+									((HuntActivity)currContext).listsUpdate();
+								}
+							}
 						}
                 		((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).addRecvMsg(chat_user_uid,recv_msg_obj.getString("msg"),recv_msg_obj.getString("ts"));
 					} catch (JSONException e) {
@@ -315,6 +336,62 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 		    	} catch (JSONException je){
 		    		je.printStackTrace();
 		    	}
+    		}
+    	}).start();
+    	
+    	baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
+    	baseURL += "get_list2";
+    	
+    	final String test = baseURL;
+       
+    	//Start Thread that receives HTTP Response
+    	new Thread(new Runnable() {
+    		public void run() {
+    			System.out.println(test);
+    			HttpClient client = new DefaultHttpClient();
+    	        HttpPost poster = new HttpPost(test);
+    	        
+    	        JSONArray uid_list = new JSONArray();
+    	        
+    	        //List<NameValuePair> uid_list = new ArrayList<NameValuePair>();
+    	        
+    	        ArrayList<ChattableUser> cu_list = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUsers();
+    	        uid_list.put("start");
+    	        uid_list.put("hey");
+    	        uid_list.put("sum");
+    	        for (int i = 0; i < cu_list.size(); i++){
+    	        	//uid_list.add(new BasicNameValuePair(String.valueOf(i), cu_list.get(i).getUid()));
+    	        	uid_list.put(cu_list.get(i).getUid());
+    	        }
+    	        
+    	        /*try {
+					poster.setEntity(new UrlEncodedFormEntity(uid_list));
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}*/
+    	        
+    	        try {
+					StringEntity se = new StringEntity(uid_list.toString());
+					poster.setEntity(se);
+					poster.setHeader("Accept", "application/json");
+				    poster.setHeader("Content-type", "application/json");
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    	        
+    	        HttpResponse response = null;
+				try {
+					response = client.execute(poster);
+					System.out.println(response.toString());
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
     		}
     	}).start();
     }
