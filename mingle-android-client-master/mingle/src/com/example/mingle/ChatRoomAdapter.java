@@ -52,31 +52,7 @@ public class ChatRoomAdapter extends ArrayAdapter {
 
         ChatRoom room_data = (ChatRoom)data.get(position);
         holder.msg_view.setText(room_data.getLastMsg());
-        /*
-        holder.button1.setOnClickListener(new View.OnClickListener() { 
-      	  @Override
-            public void onClick(View v) {
-      		  // TODO Auto-generated method stub
-      		  Toast.makeText(context, "Button 1 Clicked",Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        holder.button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-          	  // TODO Auto-generated method stub
-          	  Toast.makeText(context, "Button 2 Clicked",Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        holder.button3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-          	  // TODO Auto-generated method stub
-                Toast.makeText(context, "Button 3 Clicked",Toast.LENGTH_SHORT).show();
-            }
-        });
-			*/
+       
         return row;
 
     }

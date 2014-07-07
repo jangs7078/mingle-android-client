@@ -82,6 +82,9 @@ public class ChatroomActivity extends ListActivity {
 			System.out.println(((MingleApplication) this.getApplication()).currUser.getUid());
 			if(last_msg_uid.equals(((MingleApplication) this.getApplication()).currUser.getUid())){
 				response_msg = false;
+				DatabaseHelper db = ((MingleApplication) this.getApplication()).dbHelper;
+				// Stores messages in DB
+				db.insertMessages(recv_uid, send_uid,SMS , new Timestamp(System.currentTimeMillis()).toString());
 			}
 			
 		} catch (JSONException e) {
@@ -113,6 +116,8 @@ public class ChatroomActivity extends ListActivity {
 			String msg_ts = recv_msg_obj.getString("ts");
 			System.out.println("recved msg: "+msg_send_uid+" "+msg+" "+msg_ts);
 			((MingleApplication) this.getApplication()).currUser.addRecvMsgToRoom(msg_send_uid, msg, msg_ts);
+			// Save to local storage
+			((MingleApplication) this.getApplication()).dbHelper.insertMessages(send_uid, send_uid, msg, msg_ts);
 			adapter.notifyDataSetChanged();
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

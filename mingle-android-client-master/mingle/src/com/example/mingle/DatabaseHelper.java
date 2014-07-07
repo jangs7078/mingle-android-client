@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 
-public class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper  {
 	
 	  public static final String TABLE_UIDLIST = "uidlist";
 	  public static final String COLUMN_UID = "_uid";
@@ -34,7 +34,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	  private static final String MYUID_CREATE = "create table "
 	      + TABLE_MYUID + "(" + COLUMN_MYUID
 	      + " text not null);";
-
+	  
+	  /* Database constructor*/
 	  public DatabaseHelper(Context context) {
 	    super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	  }
@@ -55,6 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		  onCreate(db);
 	  }
 	  
+	  // Insert messages to database
 	  public boolean insertMessages(String uid, String send_uid, String msg, String msg_ts) {
 		  SQLiteDatabase db = this.getWritableDatabase();
 		  ContentValues values = new ContentValues();
@@ -65,6 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		  return true;
 	  }
 	  
+	  // Insert UID of other users in database
 	  public boolean insertNewUID(String uid){
 		  SQLiteDatabase db = this.getWritableDatabase();
 		  ContentValues values = new ContentValues();
@@ -78,6 +81,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		  return true;
 	  }
 	  
+	  // My UID
 	  public boolean setMyUID(String uid){
 		  SQLiteDatabase db = this.getWritableDatabase();
 		  ContentValues values = new ContentValues();
@@ -86,6 +90,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		  db.delete(DatabaseHelper.TABLE_MYUID,null,null);
 		  db.insert(DatabaseHelper.TABLE_MYUID,null,values);
 		  return true;
+	  }
+	  
+	  
+	  private ArrayList<Object> data(Cursor c) {
+		  /*if (c != null ) {
+			    if  (c.moveToFirst()) {
+			        do {
+			            String firstName = c.getString(c.getColumnIndex("FirstName"));
+			            int age = c.getInt(c.getColumnIndex("Age"));
+			            results.add("" + firstName + ",Age: " + age);
+			        }while (c.moveToNext());
+			    }
+			}
+			c.close();*/
+		  return null;
 	  }
 	  
 	  public Cursor getUIDList(){
