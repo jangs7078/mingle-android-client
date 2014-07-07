@@ -60,8 +60,7 @@ public class MainActivity extends ActionBarActivity {
     //Server Address
     private static final String server_url = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080";
 	private static final int SELECT_FILE = 0;
-	static final int REQUEST_IMAGE_CAPTURE = 1;
-    private Uri imageUri;
+    
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -221,6 +220,7 @@ public class MainActivity extends ActionBarActivity {
         mingleApp.currUser = new MingleUser();
         // Initialize the database helper that manages local storage
         mingleApp.dbHelper = new DatabaseHelper(this);
+        
         // Get the user's current location
         getCurrentLocation();
         
@@ -233,7 +233,6 @@ public class MainActivity extends ActionBarActivity {
             Intent i = new Intent(this, HuntActivity.class);
             startActivity(i);
         }
-        
     }
 
     
@@ -275,16 +274,16 @@ public class MainActivity extends ActionBarActivity {
         
         
         //Check validity of user input and send user creation request to server
-        //if (user.isValid()) {
+        if (user.isValid()) {
         	((MingleApplication) this.getApplication()).connectHelper.userCreateRequest(user.getPhotos(), 
         																			comment_option, 
         																			sex_option, 
         																			num_option, 
         																			user.getLong(), user.getLat());
-       /*} else {
+       } else {
     	   showInvalidUserAlert();
            System.out.println("The user is not valid.");
-       }*/
+       }
     }
 
     //Update MingleUser info and join Mingle Market
@@ -312,6 +311,8 @@ public class MainActivity extends ActionBarActivity {
         return byteArray;
     }
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    private Uri imageUri;
 
     /* Takes a picture with the camera */
     private void takePicture() {

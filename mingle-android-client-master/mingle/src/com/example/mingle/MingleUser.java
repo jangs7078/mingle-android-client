@@ -126,18 +126,6 @@ class MingleUser extends MingleApplication {
         users.add(user);
     }
     
-    public void removeChattableUser(int pos){
-    	users.remove(pos);
-    }
-    
-    public int getChattableUserPos(String uid){
-    	for(int i = 0; i < users.size(); i++){
-    		ChattableUser cu= users.get(i);
-    		if(cu.getUid().equals(uid)) return i;
-    	}
-    	return -1;
-    }
-    
     public ChattableUser getChattableUser(int pos){
         return users.get(pos);
     }

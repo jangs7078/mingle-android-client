@@ -139,18 +139,11 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
 			        .replace(R.id.fragment_container, allChatFragment).commit();
 			  
 		  } else if(tab.getTag().equals(R.string.tab2title)) {
-			  System.out.println("ongoing chat fragment on view");
 			  if(ongoingChatFragment == null) ongoingChatFragment = new OngoingChatFragment();
 			  
 			  getFragmentManager().beginTransaction()
 		        .replace(R.id.fragment_container, ongoingChatFragment).commit();
 		  }	    
-	  }
-	  
-	  //Update allChatFragment and ongoingChatFragment's lists
-	  public void listsUpdate(){
-		  if(allChatFragment != null) allChatFragment.listDataChanged();
-		  if(ongoingChatFragment != null) ongoingChatFragment.listDataChanged();
 	  }
 	  
 	  @Override
@@ -159,7 +152,6 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
 	        // Change the current activity to HuntActivity in HttpHelper
 	        System.out.println(this);
 	        ((MingleApplication) this.getApplication()).connectHelper.changeContext(this);
-	        listsUpdate();
 	 }
 	  
 	  /*
