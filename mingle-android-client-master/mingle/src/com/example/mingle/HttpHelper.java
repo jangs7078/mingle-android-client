@@ -12,6 +12,8 @@ import java.net.*;
         import io.socket.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
         import com.example.mingle.MingleUser;
         
@@ -34,19 +36,37 @@ import java.util.ArrayList;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 //import com.hmkcode.android.vo.Person;
         import org.json.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.String;
 
 /**
@@ -57,7 +77,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     private SocketIO socket = null;
     private Context currContext = null;
     private ArrayList<ChatRoom> chat_room_list;
-
+    
     public HttpHelper(String url, Context context){
     	
     	//Set up default settings for socket communication with server
@@ -79,6 +99,13 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
         currContext = context;
 
         
+    }
+    private byte[] BitmapToByteArr(Bitmap bmp) {
+    	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    	bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+    	
+    	return stream.toByteArray();
+    
     }
     
     /*
@@ -157,6 +184,15 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 							//Instantiate a chat room
 							((MingleApplication) currContext.getApplicationContext()).currUser.addChatRoom(chat_user_uid);
 							((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).setChatActive();
+						
+							//Remove from User List if available
+							int pos = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUserPos(chat_user_uid);
+							if(pos >= 0){
+								((MingleApplication) currContext.getApplicationContext()).currUser.removeChattableUser(pos);
+								if(currContext instanceof HuntActivity){
+									((HuntActivity)currContext).listsUpdate();
+								}
+							}
 						}
                 		((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).addRecvMsg(chat_user_uid,recv_msg_obj.getString("msg"),recv_msg_obj.getString("ts"));
 					} catch (JSONException e) {
@@ -185,11 +221,64 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
         socket.connect(iocb);
     }
     
+    
+    
+    private void postPhoto(final ArrayList<Bitmap> photos, final String UID) {
+
+    	final String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/add_photo?";
+    	
+        new Thread(new Runnable() {
+    		public void run() {
+    			HttpClient client = new DefaultHttpClient();
+    	        HttpPost poster = new HttpPost(baseURL);
+    	     
+    	        ArrayList<byte[]> picTempArr = new ArrayList<byte[]>();
+    	    	for(int i = 0; i < photos.size(); i++) { 
+    	    		byte[] tempBytes = BitmapToByteArr(photos.get(i));
+    	    		picTempArr.add(tempBytes);
+    	    	}
+    	    	JSONObject picObj = new JSONObject();
+    	    	JSONArray picList = new JSONArray(picTempArr);
+    	    	
+    	        try {
+    				picObj.put("pic_list", picList);
+    				picObj.put("uid", UID);
+    			} catch (JSONException e) {
+    				
+    				e.printStackTrace();
+    			}
+    	        
+    	        try {
+					StringEntity se = new StringEntity(picObj.toString());
+					poster.setEntity(se);
+					poster.setHeader("Accept", "application/json");
+				    poster.setHeader("Content-type", "application/json");
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    	        
+    	        HttpResponse response = null;
+				try {
+					response = client.execute(poster);
+					System.out.println(response.toString());
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	}).start();
+
+    }
+    
     /*
     * Sends login info along to the server, and hopefully what will be returned
     * is the unique id of the user as well as some other useful information
     */
-    public void userCreateRequest(ArrayList<Bitmap> photos, String comment, String sex, int number, float longitude, float latitude)  {
+    public void userCreateRequest(final ArrayList<Bitmap> photos, String comment, String sex, int number, float longitude, float latitude)  {
        
     	
     	String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
@@ -200,15 +289,6 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	baseURL += "loc_long=" + (new Float(longitude)).toString() + "&";
     	baseURL += "loc_lat=" + (new Float(latitude)).toString();
     	
-    	/*
-    	for (int i = 0; i < 3; i++) {
-            Integer x = i;
-            if( i < photos.size())
-            	baseURL += "pic" + Integer.toString(x + 1) photos.get(i);
-                initInfoObject.put("pic" + Integer.toString(x + 1), photos.get(i));
-            else
-                initInfoObject.put("pic" + Integer.toString(x + 1),"");
-        }*/
     	final String cpy = baseURL;
        
     	//Start Thread that receives HTTP Response
@@ -230,6 +310,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 				try{
 					 
 		    		JSONObject user_info = new JSONObject(HttpResponseBody(response));
+		    		postPhoto(photos, user_info.getString("UID"));
 		    		((MingleApplication) ((MainActivity)currContext).getApplication()).dbHelper.setMyUID(user_info.getString("UID"));
 		        	((MainActivity)currContext).joinMingle(user_info);
 		    	} catch (JSONException je){
@@ -281,6 +362,16 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	baseURL += "loc_lat=" + (new Float(latitude)).toString() + "&";
     	baseURL += "list_num=" + (new Integer(num_of_users)).toString();
     	
+    	//Add list of ChattableUsers' uids to URL as parameter
+    	ArrayList<ChattableUser> cu_list = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUsers();
+        int cu_list_size = cu_list.size();
+        if(cu_list.size() > 0) baseURL += "&";
+    	for (int i = 0; i < cu_list_size - 1; i++){
+        	baseURL += "my_list["+i+"]=" + cu_list.get(i).getUid() + "&";
+        }
+        if(cu_list.size() > 0) baseURL += "my_list["+cu_list_size+"]="+cu_list.get(cu_list_size-1).getUid();
+        else baseURL += "&my_list[0]=hello&my_list[1]=hi";
+        
     	final String cps = baseURL;
        
     	//Start Thread that receives HTTP Response

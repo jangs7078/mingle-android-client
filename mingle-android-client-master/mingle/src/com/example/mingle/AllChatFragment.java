@@ -14,6 +14,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -79,12 +82,16 @@ public class AllChatFragment extends Fragment {
               ChattableUser chat_user_obj = currentUser.getChattableUser(position);
               String chat_user_uid = chat_user_obj.getUid();
               
-              if( currentUser.getChatRoom(chat_user_uid) == null){
-            	  //Instantiate a chat room
-            	  currentUser.addChatRoom(chat_user_uid);
-            	  // Create chatroom in local sqlite
-            	  ((MingleApplication) parent.getApplication()).dbHelper.insertNewUID(chat_user_uid);
-              }
+             
+              
+              //Instantiate a chat room
+              currentUser.addChatRoom(chat_user_uid);
+              // Create chatroom in local sqlite
+              ((MingleApplication) parent.getApplication()).dbHelper.insertNewUID(chat_user_uid);
+             
+           	  //Remove selected user from ChattableUser list
+           	  ((MingleApplication) parent.getApplication()).currUser.removeChattableUser(position);
+           	  ((HuntActivity)parent).listsUpdate();
               
               Intent chat_intent = new Intent(curActivity, ChatroomActivity.class);
               chat_intent.putExtra(USER_UID, chat_user_obj.getUid());
@@ -137,6 +144,14 @@ public class AllChatFragment extends Fragment {
       
       System.out.println("AllchatFrag oncreate compleate");
     return rootView;
+  }
+  
+  public void listDataChanged(){
+	  parent.runOnUiThread(new Runnable() {
+	  		public void run() {
+	  			adapter.notifyDataSetChanged();
+	  		}
+	  });
   }
   
   public void loadNewMatches(Activity par) {
@@ -219,7 +234,11 @@ public class AllChatFragment extends Fragment {
       for(int i = 0 ; i < listData.length(); i++) {
           try {
               JSONObject shownUser = listData.getJSONObject(i);
-              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) getResources().getDrawable(R.drawable.ic_launcher));
+              
+              byte[] picArr = shownUser.getString("PIC1").getBytes();
+              System.out.println("length = " + Integer.toString(picArr.length));
+              BitmapDrawable picmap = new BitmapDrawable(parent.getApplication().getResources(), BitmapFactory.decodeByteArray(picArr , 0, picArr.length)); 
+              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) picmap);
               ((MingleApplication) parent.getApplication()).currUser.addChattableUser(new_user);
           } catch (JSONException e){
               e.printStackTrace();
