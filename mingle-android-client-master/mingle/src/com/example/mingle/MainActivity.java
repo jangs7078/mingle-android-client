@@ -1,6 +1,7 @@
 package com.example.mingle;
 
 import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.support.v7.app.ActionBarActivity;
 import android.location.Criteria;
 import android.location.Location;
@@ -11,11 +12,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View.OnClickListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -24,7 +27,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
 
 import com.example.mingle.HttpHelper;
@@ -34,6 +39,11 @@ import android.widget.*;
 import com.example.mingle.MingleApplication;
 
 //import com.google.android.gms.maps.model.Location;
+
+
+
+
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,17 +59,26 @@ public class MainActivity extends ActionBarActivity {
     
     //Server Address
     private static final String server_url = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080";
+	private static final int SELECT_FILE = 0;
     
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //InputStream stream = null;
-    	
-            if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+    	if (resultCode == RESULT_OK) {
+    		ImageView imageView = (ImageView) findViewById(R.id.photoView1);
+            if (imageView.getDrawable() == null) {
+            	imageView = (ImageView) findViewById(R.id.photoView2);
+            }
+            if (imageView.getDrawable() == null) {
+            	imageView = (ImageView) findViewById(R.id.photoView3);
+            }
+    		
+    		if (requestCode == REQUEST_IMAGE_CAPTURE) {   // If the user requested taking a photo
             	
             	Uri selectedImage = imageUri;
                 getContentResolver().notifyChange(selectedImage, null);
-                ImageView imageView = (ImageView) findViewById(R.id.photoView1);
+                
                 ContentResolver cr = getContentResolver();
                 
                 try {
@@ -75,12 +94,30 @@ public class MainActivity extends ActionBarActivity {
                     System.out.println("Camera " + e.toString());
                     e.printStackTrace();
                 }
-            } 
+            }  else if (requestCode == SELECT_FILE) { // If the user wants to select a file
+                Uri selectedImageUri = data.getData();
+ 
+                String tempPath = getPath(selectedImageUri, MainActivity.this);
+                Bitmap bm;
+                BitmapFactory.Options btmapOptions = new BitmapFactory.Options();
+                bm = BitmapFactory.decodeFile(tempPath, btmapOptions);
+                imageView.setImageBitmap(bm);
+            }
+    	}
    
     }
     
+    // Helper method to retrieve the filepath of selected image
+    public String getPath(Uri uri, Activity activity) {
+        String[] projection = { MediaColumns.DATA };
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
+ 
 
-    
+    // Get the users one-time location. Code available below to register for updates
     private void getCurrentLocation() {
     	
     	// Acquire a reference to the system Location Manager
@@ -99,7 +136,7 @@ public class MainActivity extends ActionBarActivity {
     	((MingleApplication) this.getApplication()).currUser.setLat(lon);
      
     	
-    	
+    	// In case we want to register for location updates
     	/*
     	// Define a listener that responds to location updates
     	LocationListener locationListener = new LocationListener() {
@@ -134,6 +171,40 @@ public class MainActivity extends ActionBarActivity {
             	else sex_option="M";
             }
         });
+        ImageView photoView1 = (ImageView) findViewById(R.id.photoView1);
+        photoView1.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				getUserPhoto();
+			}
+        });
+        ImageView photoView2 = (ImageView) findViewById(R.id.photoView2);
+        photoView2.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				getUserPhoto();
+			}
+        });
+        ImageView photoView3 = (ImageView) findViewById(R.id.photoView3);
+        photoView3.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				getUserPhoto();
+			}
+        });
+    }
+    
+    private boolean AppOnFirstTime() {
+    	DatabaseHelper db = ((MingleApplication) this.getApplication()).dbHelper;
+    	MingleApplication mingleApp = (MingleApplication) this.getApplication();
+    	if(db.isFirst()) {
+    		return true;
+    	}
+    	mingleApp.currUser.setUid(mingleApp.dbHelper.getMyUID());
+    	/*Cursor chatters = mingleApp.dbHelper.getUIDList();
+    	Cursor msgs = mingleApp.dbHelper.getMsgList();
+    	// Populate other fields with UID*/
+    	return false;
     }
     
     @Override
@@ -149,14 +220,50 @@ public class MainActivity extends ActionBarActivity {
         mingleApp.currUser = new MingleUser();
         // Initialize the database helper that manages local storage
         mingleApp.dbHelper = new DatabaseHelper(this);
-
-        initializeUIViews();
         // Get the user's current location
-        //getCurrentLocation();
+        getCurrentLocation();
         
-        //this.takePicture();
+        // If the app is not on for the first time, start HuntActivity
+        // and populate it with data from local storage
+        if(AppOnFirstTime()) {
+        	initializeUIViews();
+        } else {
+        	//Start activity for Mingle Market
+            Intent i = new Intent(this, HuntActivity.class);
+            startActivity(i);
+        }
+        
     }
 
+    
+    private void getUserPhoto() {
+        final CharSequence[] items = { "Take Photo", "Choose from Library",
+        "Cancel" };
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+		builder.setTitle("Add Photo!");
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+		    @Override
+		    public void onClick(DialogInterface dialog, int item) {
+		        if (items[item].equals("Take Photo")) {
+		            takePicture();
+		        } else if (items[item].equals("Choose from Library")) {
+		            Intent intent = new Intent(
+		                    Intent.ACTION_PICK,
+		                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		            intent.setType("image/*");
+		            startActivityForResult(
+		                    Intent.createChooser(intent, "Select File"),
+		                    SELECT_FILE);
+		        } else if (items[item].equals("Cancel")) {
+		            dialog.dismiss();
+		        }
+		    }
+		});
+		builder.show();
+
+    }
+    
     //On user creation request, get user's info and send request to server
     public void userCreateButtonPressed(View view) {
         //hard coded. need to be replaced later on
@@ -164,6 +271,7 @@ public class MainActivity extends ActionBarActivity {
         num_option = 4;
         
         MingleUser user =  ((MingleApplication) this.getApplication()).currUser;
+        
         
         //Check validity of user input and send user creation request to server
         //if (user.isValid()) {
@@ -181,9 +289,10 @@ public class MainActivity extends ActionBarActivity {
     //Update MingleUser info and join Mingle Market
     //Called when user creation request confirmation returns from server
     public void joinMingle(JSONObject userData) {
-        try {
+        
+    	try {
             System.out.println(userData.toString());
-            
+           
             ((MingleApplication) this.getApplication()).currUser.setAttributes(userData.getString("UID"), userData.getString("SEX"), userData.getInt("NUM"), userData.getString("COMM"),
                                                                                         (float)userData.getDouble("LOC_LAT"), (float)userData.getDouble("LOC_LONG"), userData.getInt("DIST_LIM"));
         } catch(JSONException e){
