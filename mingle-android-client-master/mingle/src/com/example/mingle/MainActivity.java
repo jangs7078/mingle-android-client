@@ -225,13 +225,13 @@ public class MainActivity extends ActionBarActivity {
         
         // If the app is not on for the first time, start HuntActivity
         // and populate it with data from local storage
-        if(AppOnFirstTime()) {
+        //if(AppOnFirstTime()) {
         	initializeUIViews();
-        } else {
+        /*} else {
         	//Start activity for Mingle Market
             Intent i = new Intent(this, HuntActivity.class);
             startActivity(i);
-        }
+        }*/
         
     }
 

@@ -302,14 +302,14 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	baseURL += "loc_lat=" + (new Float(latitude)).toString() + "&";
     	baseURL += "list_num=" + (new Integer(num_of_users)).toString();
     	
+    	//Add list of ChattableUsers' uids to URL as parameter
     	ArrayList<ChattableUser> cu_list = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUsers();
         int cu_list_size = cu_list.size();
         if(cu_list.size() > 0) baseURL += "&";
     	for (int i = 0; i < cu_list_size - 1; i++){
-        	//uid_list.add(new BasicNameValuePair(String.valueOf(i), cu_list.get(i).getUid()));
         	baseURL += "my_list["+i+"]=" + cu_list.get(i).getUid() + "&";
         }
-        if(cu_list.size() > 0)baseURL += "my_list["+cu_list_size+"]="+cu_list.get(cu_list_size-1).getUid();
+        if(cu_list.size() > 0) baseURL += "my_list["+cu_list_size+"]="+cu_list.get(cu_list_size-1).getUid();
         else baseURL += "&my_list[0]=hello&my_list[1]=hi";
         
     	final String cps = baseURL;
@@ -340,65 +340,6 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 		    	}
     		}
     	}).start();
-    	/*
-    	baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
-    	baseURL += "get_list2?";
-    	baseURL += "sex=" + sex + "&";
-    	baseURL += "dist_lim=" + (new Integer(dist_lim)).toString() + "&";
-    	baseURL += "loc_long=" + (new Float(longitude)).toString() + "&";
-    	baseURL += "loc_lat=" + (new Float(latitude)).toString() + "&";
-    	baseURL += "list_num=" + (new Integer(num_of_users)).toString();
-    	
-    	final String test = baseURL;
-       
-    	//Start Thread that receives HTTP Response
-    	new Thread(new Runnable() {
-    		public void run() {
-    			System.out.println(test);
-    			HttpClient client = new DefaultHttpClient();
-    	        HttpPost poster = new HttpPost(test);
-    	        
-    	        JSONObject post_obj = new JSONObject();
-    	        JSONArray uid_list = new JSONArray();
-    	        
-    	        uid_list.put("hello");
-    	        uid_list.put("hello2");
-    	        ArrayList<ChattableUser> cu_list = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUsers();
-    	        for (int i = 0; i < cu_list.size(); i++){
-    	        	//uid_list.add(new BasicNameValuePair(String.valueOf(i), cu_list.get(i).getUid()));
-    	        	uid_list.put(cu_list.get(i).getUid());
-    	        }
-    	        
-    	        try {
-					post_obj.put("uid_list", uid_list);
-				} catch (JSONException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
-				}
-    	        
-    	        try {
-					StringEntity se = new StringEntity(post_obj.toString());
-					poster.setEntity(se);
-					poster.setHeader("Accept", "application/json");
-				    poster.setHeader("Content-type", "application/json");
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-    	        
-    	        HttpResponse response = null;
-				try {
-					response = client.execute(poster);
-					System.out.println(response.toString());
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    		}
-    	}).start();*/
     }
     
     //HttpHelper method to deliver user's message to server
