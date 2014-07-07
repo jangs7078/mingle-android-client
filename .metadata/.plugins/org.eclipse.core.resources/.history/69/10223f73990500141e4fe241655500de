@@ -341,12 +341,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	}).start();
     	
     	baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
-    	baseURL += "get_list2?";
-    	baseURL += "sex=" + sex + "&";
-    	baseURL += "dist_lim=" + (new Integer(dist_lim)).toString() + "&";
-    	baseURL += "loc_long=" + (new Float(longitude)).toString() + "&";
-    	baseURL += "loc_lat=" + (new Float(latitude)).toString() + "&";
-    	baseURL += "list_num=" + (new Integer(num_of_users)).toString();
+    	baseURL += "get_list2";
     	
     	final String test = baseURL;
        

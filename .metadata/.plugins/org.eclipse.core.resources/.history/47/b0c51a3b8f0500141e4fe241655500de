@@ -40,7 +40,6 @@ import java.util.List;
 
 
 
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -341,12 +340,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	}).start();
     	
     	baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
-    	baseURL += "get_list2?";
-    	baseURL += "sex=" + sex + "&";
-    	baseURL += "dist_lim=" + (new Integer(dist_lim)).toString() + "&";
-    	baseURL += "loc_long=" + (new Float(longitude)).toString() + "&";
-    	baseURL += "loc_lat=" + (new Float(latitude)).toString() + "&";
-    	baseURL += "list_num=" + (new Integer(num_of_users)).toString();
+    	baseURL += "get_list2";
     	
     	final String test = baseURL;
        
@@ -357,26 +351,28 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     			HttpClient client = new DefaultHttpClient();
     	        HttpPost poster = new HttpPost(test);
     	        
-    	        JSONObject post_obj = new JSONObject();
     	        JSONArray uid_list = new JSONArray();
     	        
-    	        uid_list.put("hello");
-    	        uid_list.put("hello2");
+    	        //List<NameValuePair> uid_list = new ArrayList<NameValuePair>();
+    	        
     	        ArrayList<ChattableUser> cu_list = ((MingleApplication) currContext.getApplicationContext()).currUser.getChattableUsers();
+    	        uid_list.put("start");
+    	        uid_list.put("hey");
+    	        uid_list.put("sum");
     	        for (int i = 0; i < cu_list.size(); i++){
     	        	//uid_list.add(new BasicNameValuePair(String.valueOf(i), cu_list.get(i).getUid()));
     	        	uid_list.put(cu_list.get(i).getUid());
     	        }
     	        
-    	        try {
-					post_obj.put("uid_list", uid_list);
-				} catch (JSONException e2) {
+    	        /*try {
+					poster.setEntity(new UrlEncodedFormEntity(uid_list));
+				} catch (UnsupportedEncodingException e1) {
 					// TODO Auto-generated catch block
-					e2.printStackTrace();
-				}
+					e1.printStackTrace();
+				}*/
     	        
     	        try {
-					StringEntity se = new StringEntity(post_obj.toString());
+					StringEntity se = new StringEntity(uid_list.toString());
 					poster.setEntity(se);
 					poster.setHeader("Accept", "application/json");
 				    poster.setHeader("Content-type", "application/json");
