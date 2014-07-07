@@ -1,0 +1,130 @@
+package com.example.mingle;
+
+
+import android.app.Application;
+import android.os.Bundle;
+import java.util.*;
+import android.graphics.*;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+/**
+ * Created by Tempnote on 2014-06-02.
+ */
+
+class MingleUser extends MingleApplication {
+
+    private ArrayList<Bitmap> photos = new ArrayList<Bitmap>();;
+    private String uid;
+    private String sex;
+    private int num;
+    private String comment;
+    private float latitude;
+    private float longitude;
+    private int dist_lim;
+
+    private ArrayList<JSONObject> users = new ArrayList<JSONObject>();
+    private ArrayList<Object> msg_arr = new ArrayList<Object>();
+
+    public void setAttributes(String uid_var, String sex_var, int num_var, String comment_var, float latitude_var, float longitude_var, int dist_lim_var){
+        setUid(uid_var);
+        setSex(sex_var);
+        setNum(num_var);
+        setComm(comment_var);
+        setLat(latitude_var);
+        setLong(longitude_var);
+        setDist(dist_lim_var);
+    }
+    
+    public void addPhoto(Bitmap photo) {
+    	photos.add(photo);
+    }
+    
+    public Bitmap getPic(int num) {
+    	if(photos.size() >= num) {
+    		return photos.get(num);
+    	} 
+    	return null;
+    }
+
+    public String getUid(){
+        return uid;
+    }
+
+    public String getSex(){
+        return sex;
+    }
+
+    public int getNum(){
+        return num;
+    }
+
+    public String getComm(){
+        return comment;
+    }
+
+    public float getLat(){
+        return latitude;
+    }
+
+    public float getLong(){
+        return longitude;
+    }
+
+    public int getDist(){
+        return dist_lim;
+    }
+
+    public void setUid(String uid_var){
+        uid = uid_var;
+    }
+
+    public void setSex(String sex_var){
+        sex = sex_var;
+    }
+
+    public void setNum(int num_var){
+        num = num_var;
+    }
+
+    public void setComm(String comment_var){
+        comment = comment_var;
+    }
+
+    public void setLat(float latitude_var){
+        latitude = latitude_var;
+    }
+
+    public void setLong(float longitude_var){
+        longitude = longitude_var;
+    }
+
+    public void setDist(int dist_lim_var){
+        dist_lim = dist_lim_var;
+    }
+
+    public boolean isValid() {
+        if (photos == null) {
+            photos = new ArrayList<Bitmap>();
+        }
+
+        if (num == -1 ||  photos.size() == 0)
+            return false;
+
+        return true;
+    }
+
+    public ArrayList<Bitmap> getPhotos(){
+        return photos;
+    }
+
+    public void addUser(JSONObject user){
+        users.add(user);
+    }
+
+    public ArrayList<JSONObject> getUsers (){
+        return users;
+    }
+}

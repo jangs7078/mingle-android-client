@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+<<<<<<< HEAD
+=======
+org.eclipse.jdt.core.builder.resourceCopyExclusionFilter=
+>>>>>>> 0d5fe258dbd8c1e42e949d3b2ebe5592aa5215b9
+org.eclipse.jdt.core.codeComplete.visibilityCheck=enabled
