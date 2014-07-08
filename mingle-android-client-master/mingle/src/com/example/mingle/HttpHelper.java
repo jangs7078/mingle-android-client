@@ -5,6 +5,7 @@ package com.example.mingle;
         import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import java.net.*;
@@ -16,6 +17,7 @@ import java.util.List;
 
         import com.example.mingle.MingleUser;
         
+
 
 
 
@@ -167,7 +169,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 						ChatRoom chatroom = ((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid);
 						if(chatroom  == null){
 							//Instantiate a chat room
-							((MingleApplication) currContext.getApplicationContext()).currUser.addChatRoom(chat_user_uid);
+							((MingleApplication) currContext.getApplicationContext()).currUser.addChatRoom(chat_user_uid, (Drawable) currContext.getResources().getDrawable(R.drawable.ic_launcher));
 							((MingleApplication) currContext.getApplicationContext()).currUser.getChatRoom(chat_user_uid).setChatActive();
 						
 							//Remove from User List if available

@@ -10,8 +10,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.app.ActionBar;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -116,14 +118,27 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
 	        .getSelectedNavigationIndex());
 	  }
 	  
-	  
-	  /* Probably need to fix this method!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 	  @Override
-	  public boolean onCreateOptionsMenu(Menu menu) {
-	    getMenuInflater().inflate(R.menu.chat, menu);
-	    return true;
-	  }
+	    public boolean onCreateOptionsMenu(Menu menu) {
+	        // Inflate the menu; this adds items to the action bar if it is present.
+	        super.onCreateOptionsMenu(menu);
+	        getMenuInflater().inflate(R.menu.chat, menu);
+
+	        return true;  
+	    }
 	  
+	  @Override
+	  public boolean onOptionsItemSelected(MenuItem item) {
+	      // Handle item selection
+	      switch (item.getItemId()) {
+	      	case R.id.personal_settings:
+	      		Intent intent = new Intent(this, SettingActivity.class);
+	      	    startActivity(intent);
+	            return true;
+	          default:
+	              return super.onOptionsItemSelected(item);
+	      }
+	  }
 	 
 	  @Override
 	  public void onTabSelected(ActionBar.Tab tab,

@@ -9,16 +9,20 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.drawable.Drawable;
+
 class ChatRoom{
 	
 	private ArrayList<JSONObject> msg_list;
 	private String recv_uid;
 	private boolean just_created;
+	private Drawable user_pic;
 	
-	public ChatRoom(String uid){
+	public ChatRoom(String uid, Drawable image){
 		msg_list =  new ArrayList<JSONObject>();
 		recv_uid = uid;
 		just_created = true;
+		user_pic = image;
 	}
 	
 	public boolean isJustCreated(){
@@ -98,6 +102,10 @@ class ChatRoom{
 			e.printStackTrace();
 		}
 		return "";
+	}
+	
+	public Drawable getPic(){
+		return user_pic;
 	}
 	
 }

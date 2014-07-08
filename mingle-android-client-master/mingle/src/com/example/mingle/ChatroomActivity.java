@@ -53,9 +53,9 @@ public class ChatroomActivity extends ListActivity {
 		//Associate this chat room's message list to adapter
 		adapter=new MsgAdapter(this,
                 R.layout.msg_row,
-                ((MingleApplication) this.getApplication()).currUser.getChatRoom(recv_uid).getMsgList());
+                ((MingleApplication) this.getApplication()).currUser.getChatRoom(recv_uid).getMsgList(), this);
         setListAdapter(adapter);
-        
+         
 		
 		setContentView(R.layout.activity_chatroom);
     }

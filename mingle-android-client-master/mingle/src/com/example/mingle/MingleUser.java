@@ -7,6 +7,7 @@ import android.os.Bundle;
 import java.util.*;
 
 import android.graphics.*;
+import android.graphics.drawable.Drawable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -159,8 +160,8 @@ class MingleUser extends MingleApplication {
     	chat_room_map.get(send_uid).addRecvMsg(send_uid, msg, ts);
     }
     
-    public void addChatRoom(String uid){
-    	ChatRoom cr = new ChatRoom(uid);
+    public void addChatRoom(String uid, Drawable image){
+    	ChatRoom cr = new ChatRoom(uid, image);
     	chat_room_map.put(uid, cr);
     }
     
