@@ -18,7 +18,7 @@ import org.json.JSONObject;
 
 class MingleUser extends MingleApplication {
 
-    private ArrayList<Bitmap> photos = new ArrayList<Bitmap>();;
+    private ArrayList<String> photoPaths = new ArrayList<String>();;
     private String uid;
     private String sex;
     private int num;
@@ -40,13 +40,16 @@ class MingleUser extends MingleApplication {
         setDist(dist_lim_var);
     }
     
-    public void addPhoto(Bitmap photo) {
-    	photos.add(photo);
+    public void addPhotoPath(String photoPath) {
+    	photoPaths.add(photoPath);
     }
     
     public Bitmap getPic(int num) {
-    	if(photos.size() >= num) {
-    		return photos.get(num);
+    	if(photoPaths.size() >= num) {
+    		Bitmap bm;
+            BitmapFactory.Options btmapOptions = new BitmapFactory.Options();
+            bm = BitmapFactory.decodeFile( photoPaths.get(num), btmapOptions);
+    		return bm;
     	} 
     	return null;
     }
@@ -108,18 +111,18 @@ class MingleUser extends MingleApplication {
     }
 
     public boolean isValid() {
-        if (photos == null) {
-            photos = new ArrayList<Bitmap>();
+        if (photoPaths == null) {
+            photoPaths = new ArrayList<String>();
         }
-
-        if (num == -1 ||  photos.size() == 0)
+        
+        if (/*num == -1 ||  */photoPaths.size() == 0)
             return false;
 
         return true;
     }
 
-    public ArrayList<Bitmap> getPhotos(){
-        return photos;
+    public ArrayList<String> getPhotoPaths(){
+        return photoPaths;
     }
 
     public void addChattableUser(ChattableUser user){

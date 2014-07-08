@@ -2,21 +2,22 @@ package com.example.mingle;
 //package com.hmkcode.android;
 
         
-        import android.content.Context;
+        import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-
 import java.net.*;
-
         import io.socket.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
         import com.example.mingle.MingleUser;
         
+
+
+
+
 
 
 
@@ -58,12 +59,14 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 //import com.hmkcode.android.vo.Person;
         import org.json.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -100,11 +103,11 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 
         
     }
-    private byte[] BitmapToByteArr(Bitmap bmp) {
+    private String BitmapToString(Bitmap bmp) {
     	ByteArrayOutputStream stream = new ByteArrayOutputStream();
     	bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
     	
-    	return stream.toByteArray();
+    	return new String(stream.toByteArray());
     
     }
     
@@ -223,52 +226,20 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     
     
     
-    private void postPhoto(final ArrayList<Bitmap> photos, final String UID) {
+    private void postPhoto(final ArrayList<String> photoPaths, final String UID) {
 
-    	final String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/add_photo?";
+    	final String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
     	
         new Thread(new Runnable() {
     		public void run() {
-    			HttpClient client = new DefaultHttpClient();
-    	        HttpPost poster = new HttpPost(baseURL);
-    	     
-    	        ArrayList<byte[]> picTempArr = new ArrayList<byte[]>();
-    	    	for(int i = 0; i < photos.size(); i++) { 
-    	    		byte[] tempBytes = BitmapToByteArr(photos.get(i));
-    	    		picTempArr.add(tempBytes);
-    	    	}
-    	    	JSONObject picObj = new JSONObject();
-    	    	JSONArray picList = new JSONArray(picTempArr);
-    	    	
-    	        try {
-    				picObj.put("pic_list", picList);
-    				picObj.put("uid", UID);
-    			} catch (JSONException e) {
-    				
-    				e.printStackTrace();
-    			}
-    	        
-    	        try {
-					StringEntity se = new StringEntity(picObj.toString());
-					poster.setEntity(se);
-					poster.setHeader("Accept", "application/json");
-				    poster.setHeader("Content-type", "application/json");
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-    	        
-    	        HttpResponse response = null;
-				try {
-					response = client.execute(poster);
-					System.out.println(response.toString());
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
+    			try {
+					String response = PhotoPoster.postPhoto(photoPaths, UID, baseURL);
+					System.out.println(response);
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+    		
     		}
     	}).start();
 
@@ -278,7 +249,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     * Sends login info along to the server, and hopefully what will be returned
     * is the unique id of the user as well as some other useful information
     */
-    public void userCreateRequest(final ArrayList<Bitmap> photos, String comment, String sex, int number, float longitude, float latitude)  {
+    public void userCreateRequest(final ArrayList<String> photos, String comment, String sex, int number, float longitude, float latitude)  {
        
     	
     	String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";

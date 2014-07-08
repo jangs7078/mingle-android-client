@@ -7,6 +7,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,6 +17,9 @@ import android.view.View.OnClickListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -30,15 +34,23 @@ import android.content.IntentSender.SendIntentException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.view.View;
 
 import com.example.mingle.HttpHelper;
 
 import android.widget.*;
+import android.widget.ImageView.ScaleType;
 
 import com.example.mingle.MingleApplication;
 
 //import com.google.android.gms.maps.model.Location;
+
+
+
+
+
+
 
 
 
@@ -61,16 +73,18 @@ public class MainActivity extends ActionBarActivity {
     private static final String server_url = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080";
 	private static final int SELECT_FILE = 0;
     
-    
+ 
+	
+	
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //InputStream stream = null;
     	if (resultCode == RESULT_OK) {
     		ImageView imageView = (ImageView) findViewById(R.id.photoView1);
-            if (imageView.getDrawable() == null) {
+            if (imageView.getDrawable() != null) {
             	imageView = (ImageView) findViewById(R.id.photoView2);
-            }
-            if (imageView.getDrawable() == null) {
+            } 
+            if (imageView.getDrawable() != null) {
             	imageView = (ImageView) findViewById(R.id.photoView3);
             }
     		
@@ -84,9 +98,16 @@ public class MainActivity extends ActionBarActivity {
                 try {
                      Bitmap taken_photo_bitmap = android.provider.MediaStore.Images.Media
                      .getBitmap(cr, selectedImage);
-                     
                     imageView.setImageBitmap(taken_photo_bitmap);
-                    ((MingleApplication) this.getApplication()).currUser.addPhoto(taken_photo_bitmap);
+                    ((MingleApplication) this.getApplication()).currUser.addPhotoPath(selectedImage.getPath());
+                    
+                    /*
+                    int rotateImage = getCameraPhotoOrientation(MainActivity.this, selectedImage, selectedImage.getPath());
+                    Matrix matrix=new Matrix();
+                    imageView.setScaleType(ScaleType.MATRIX);   //required
+                    matrix.postRotate( rotateImage, imageView.getDrawable().getBounds().width()/2, imageView.getDrawable().getBounds().height()/2);
+                    imageView.setImageMatrix(matrix);*/
+                    
                     Toast.makeText(this, selectedImage.toString(),
                             Toast.LENGTH_LONG).show();
                 } catch (Exception e) {
@@ -99,6 +120,7 @@ public class MainActivity extends ActionBarActivity {
                 Uri selectedImageUri = data.getData();
  
                 String tempPath = getPath(selectedImageUri, MainActivity.this);
+                ((MingleApplication) this.getApplication()).currUser.addPhotoPath(tempPath);
                 Bitmap bm;
                 BitmapFactory.Options btmapOptions = new BitmapFactory.Options();
                 bm = BitmapFactory.decodeFile(tempPath, btmapOptions);
@@ -115,7 +137,7 @@ public class MainActivity extends ActionBarActivity {
         String[] projection = { MediaColumns.DATA };
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
-        cursor.moveToFirst();
+        cursor.moveToFirst(); 
         return cursor.getString(column_index);
     }
  
@@ -213,6 +235,33 @@ public class MainActivity extends ActionBarActivity {
     	return false;
     }
     
+    public int getCameraPhotoOrientation(Context context, Uri imageUri, String imagePath){
+        int rotate = 0;
+        try {
+            context.getContentResolver().notifyChange(imageUri, null);
+            File imageFile = new File(imagePath);
+
+            ExifInterface exif = new ExifInterface(imageFile.getAbsolutePath());
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+            switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                rotate = 270;
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                rotate = 180;
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                rotate = 90;
+                break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rotate;
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -280,16 +329,16 @@ public class MainActivity extends ActionBarActivity {
         
         
         //Check validity of user input and send user creation request to server
-        //if (user.isValid()) {
-        	((MingleApplication) this.getApplication()).connectHelper.userCreateRequest(user.getPhotos(), 
+        if (user.isValid()) {
+        	((MingleApplication) this.getApplication()).connectHelper.userCreateRequest(user.getPhotoPaths(), 
         																			comment_option, 
         																			sex_option, 
         																			num_option, 
         																			user.getLong(), user.getLat());
-       /*} else {
+      } else {
     	   showInvalidUserAlert();
            System.out.println("The user is not valid.");
-       }*/
+       }
     }
 
     //Update MingleUser info and join Mingle Market
@@ -299,8 +348,11 @@ public class MainActivity extends ActionBarActivity {
     	try {
             System.out.println(userData.toString());
            
-            ((MingleApplication) this.getApplication()).currUser.setAttributes(userData.getString("UID"), userData.getString("SEX"), userData.getInt("NUM"), userData.getString("COMM"),
-                                                                                        (float)userData.getDouble("LOC_LAT"), (float)userData.getDouble("LOC_LONG"), userData.getInt("DIST_LIM"));
+            ((MingleApplication) this.getApplication()).currUser.setAttributes(userData.getString("UID"), userData.getString("SEX"), 
+            																	userData.getInt("NUM"), userData.getString("COMM"),
+                                                                                        (float)userData.getDouble("LOC_LAT"), 
+                                                                                        (float)userData.getDouble("LOC_LONG"), 
+                                                                                        userData.getInt("DIST_LIM"));
         } catch(JSONException e){
             e.printStackTrace();
         }
@@ -310,17 +362,17 @@ public class MainActivity extends ActionBarActivity {
         startActivity(i);
     }
     
-    private byte[] compressPicture(Bitmap pic) {
+   /* private byte[] compressPicture(Bitmap pic) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         pic.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
         return byteArray;
-    }
-
+    }*/
+   
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private Uri imageUri;
-
-    /* Takes a picture with the camera */
+    
+    
     private void takePicture() {
     	 Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
     	  File photo = new File(Environment.getExternalStorageDirectory(),  "Pic.jpg");

@@ -234,11 +234,19 @@ public class AllChatFragment extends Fragment {
       for(int i = 0 ; i < listData.length(); i++) {
           try {
               JSONObject shownUser = listData.getJSONObject(i);
+             
+              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")));
+             
+              for(int j = 1; j <= 3; j++) {
+            	  if(shownUser.has("PIC" + Integer.toString(j))) {
+            		  byte[] picArr = shownUser.getString("PIC" + Integer.toString(j)).getBytes();
+            		  BitmapDrawable picmap = new BitmapDrawable(parent.getApplication().getResources(), 
+            				  									BitmapFactory.decodeByteArray(picArr , 0,
+            				  											picArr.length)); 
+            		  new_user.addpic(picmap);
+            	  }
+              }
               
-              byte[] picArr = shownUser.getString("PIC1").getBytes();
-              System.out.println("length = " + Integer.toString(picArr.length));
-              BitmapDrawable picmap = new BitmapDrawable(parent.getApplication().getResources(), BitmapFactory.decodeByteArray(picArr , 0, picArr.length)); 
-              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) picmap);
               ((MingleApplication) parent.getApplication()).currUser.addChattableUser(new_user);
           } catch (JSONException e){
               e.printStackTrace();
