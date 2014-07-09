@@ -2,21 +2,28 @@ package com.example.mingle;
 //package com.hmkcode.android;
 
         
-        import android.content.Context;
+        import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-
 import java.net.*;
-
         import io.socket.*;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
         import com.example.mingle.MingleUser;
         
+
+
+
+
+
+
+
+
+
 
 
 
@@ -53,12 +60,15 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 //import com.hmkcode.android.vo.Person;
         import org.json.*;
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.String;
@@ -71,7 +81,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     private SocketIO socket = null;
     private Context currContext = null;
     private ArrayList<ChatRoom> chat_room_list;
-
+    
     public HttpHelper(String url, Context context){
     	
     	//Set up default settings for socket communication with server
@@ -93,6 +103,13 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
         currContext = context;
 
         
+    }
+    private String BitmapToString(Bitmap bmp) {
+    	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    	bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+    	
+    	return new String(stream.toByteArray());
+    
     }
     
     /*
@@ -208,11 +225,32 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
         socket.connect(iocb);
     }
     
+    
+    
+    private void postPhoto(final ArrayList<String> photoPaths, final String UID) {
+
+    	final String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
+    	
+        new Thread(new Runnable() {
+    		public void run() {
+    			try {
+					String response = PhotoPoster.postPhoto(photoPaths, UID, baseURL);
+					System.out.println(response);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		
+    		}
+    	}).start();
+
+    }
+    
     /*
     * Sends login info along to the server, and hopefully what will be returned
     * is the unique id of the user as well as some other useful information
     */
-    public void userCreateRequest(ArrayList<Bitmap> photos, String comment, String sex, int number, float longitude, float latitude)  {
+    public void userCreateRequest(final ArrayList<String> photos, String comment, String sex, int number, float longitude, float latitude)  {
        
     	
     	String baseURL = "http://ec2-54-178-214-176.ap-northeast-1.compute.amazonaws.com:8080/";
@@ -223,15 +261,6 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
     	baseURL += "loc_long=" + (new Float(longitude)).toString() + "&";
     	baseURL += "loc_lat=" + (new Float(latitude)).toString();
     	
-    	/*
-    	for (int i = 0; i < 3; i++) {
-            Integer x = i;
-            if( i < photos.size())
-            	baseURL += "pic" + Integer.toString(x + 1) photos.get(i);
-                initInfoObject.put("pic" + Integer.toString(x + 1), photos.get(i));
-            else
-                initInfoObject.put("pic" + Integer.toString(x + 1),"");
-        }*/
     	final String cpy = baseURL;
        
     	//Start Thread that receives HTTP Response
@@ -253,6 +282,7 @@ public class HttpHelper extends AsyncTask<String, MingleUser, Integer>  {
 				try{
 					 
 		    		JSONObject user_info = new JSONObject(HttpResponseBody(response));
+		    		postPhoto(photos, user_info.getString("UID"));
 		    		((MingleApplication) ((MainActivity)currContext).getApplication()).dbHelper.setMyUID(user_info.getString("UID"));
 		        	((MainActivity)currContext).joinMingle(user_info);
 		    	} catch (JSONException je){

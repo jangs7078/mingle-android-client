@@ -1,19 +1,27 @@
 package com.example.mingle;
 
+import java.util.ArrayList;
+
 import android.graphics.drawable.Drawable;
 
 public class ChattableUser {
 	String user_uid;
 	String comment;
 	int num;
-    Drawable pic;
+	ArrayList<Drawable> pics;
+    
 
-    public ChattableUser(String user_uid, String comment, int num, Drawable pic) {
+    public ChattableUser(String user_uid, String comment, int num) {
           super();
           this.user_uid = user_uid;
           this.comment = comment;
           this.num = num;
-          this.pic = pic;
+          this.pics = new ArrayList<Drawable>();
+          
+    }
+    
+    public void addPics(ArrayList<Drawable> friendPics) {
+    	pics.addAll(friendPics);
     }
     
     public String getUid() {
@@ -40,12 +48,16 @@ public class ChattableUser {
 	  	this.num = num;
   	}
   
-    public Drawable getPic() {
-          return pic;
+    public Drawable getPic(int index) {
+          return pics.get(index);
     }
     
-    public void setpic(Drawable pic) {
-          this.pic = pic;
+    public boolean hasPic() {
+    	return pics.size() > 0;
+    }
+    
+    public void addpic(Drawable pic) {
+          pics.add(pic);
     }
 
 }

@@ -56,32 +56,9 @@ public class AllChatAdapter extends ArrayAdapter {
         ChattableUser itemdata = ((ArrayList<ChattableUser>)data).get(position);
         holder.user_num.setText(Integer.toString(itemdata.getNum()));
         holder.user_comment.setText(itemdata.getComment());
-        holder.user_pic.setImageDrawable(itemdata.getPic());
-        /*
-        holder.button1.setOnClickListener(new View.OnClickListener() { 
-      	  @Override
-            public void onClick(View v) {
-      		  // TODO Auto-generated method stub
-      		  Toast.makeText(context, "Button 1 Clicked",Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        holder.button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-          	  // TODO Auto-generated method stub
-          	  Toast.makeText(context, "Button 2 Clicked",Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        holder.button3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-          	  // TODO Auto-generated method stub
-                Toast.makeText(context, "Button 3 Clicked",Toast.LENGTH_SHORT).show();
-            }
-        });
-			*/
+        if(itemdata.hasPic())
+        	holder.user_pic.setImageDrawable(itemdata.getPic(1));
+        
         return row;
 
     }

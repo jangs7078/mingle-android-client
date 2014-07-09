@@ -14,6 +14,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -231,7 +234,19 @@ public class AllChatFragment extends Fragment {
       for(int i = 0 ; i < listData.length(); i++) {
           try {
               JSONObject shownUser = listData.getJSONObject(i);
-              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")), (Drawable) getResources().getDrawable(R.drawable.ic_launcher));
+             
+              ChattableUser new_user = new ChattableUser(shownUser.getString("UID"), shownUser.getString("COMM"), Integer.valueOf(shownUser.getString("NUM")));
+             
+              for(int j = 1; j <= 3; j++) {
+            	  if(shownUser.has("PIC" + Integer.toString(j))) {
+            		  byte[] picArr = shownUser.getString("PIC" + Integer.toString(j)).getBytes();
+            		  BitmapDrawable picmap = new BitmapDrawable(parent.getApplication().getResources(), 
+            				  									BitmapFactory.decodeByteArray(picArr , 0,
+            				  											picArr.length)); 
+            		  new_user.addpic(picmap);
+            	  }
+              }
+              
               ((MingleApplication) parent.getApplication()).currUser.addChattableUser(new_user);
           } catch (JSONException e){
               e.printStackTrace();

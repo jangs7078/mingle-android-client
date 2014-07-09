@@ -34,6 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper  {
 	  private static final String MYUID_CREATE = "create table "
 	      + TABLE_MYUID + "(" + COLUMN_MYUID
 	      + " text not null);";
+	 
 	  
 	  /* Database constructor*/
 	  public DatabaseHelper(Context context) {
@@ -92,26 +93,29 @@ public class DatabaseHelper extends SQLiteOpenHelper  {
 		  return true;
 	  }
 	  
+	
 	  
-	  private ArrayList<Object> data(Cursor c) {
-		  /*if (c != null ) {
+	  private ArrayList<String> getData(Cursor c, String key) {
+		  ArrayList<String> datas = new ArrayList<String>();
+		  
+		  if (c != null ) {
 			    if  (c.moveToFirst()) {
 			        do {
-			            String firstName = c.getString(c.getColumnIndex("FirstName"));
-			            int age = c.getInt(c.getColumnIndex("Age"));
-			            results.add("" + firstName + ",Age: " + age);
+			            String frag = c.getString(c.getColumnIndex(key));
+			            datas.add(frag);
 			        }while (c.moveToNext());
 			    }
 			}
-			c.close();*/
-		  return null;
+			c.close();
+		  return datas;
 	  }
 	  
-	  public Cursor getUIDList(){
+	  public ArrayList<String> getUIDList(){
 		  SQLiteDatabase db = this.getReadableDatabase();
 		  String[] uid_columns={DatabaseHelper.COLUMN_UID};
 		  Cursor cursor = db.query(DatabaseHelper.TABLE_UIDLIST,uid_columns,null,null,null,null,null);
-		  return cursor;
+		  
+		  return getData(cursor, COLUMN_UID);
 	  }
 	  
 	  public Cursor getMsgList(String uid){

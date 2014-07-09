@@ -44,7 +44,7 @@ public class HuntActivity extends FragmentActivity implements ActionBar.TabListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hunt);
-        System.out.println("hunt on create");
+        
         
         /*
         //GCM Setup here
